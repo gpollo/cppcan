@@ -1,0 +1,8 @@
+[wrap-file]
+directory = libpcanbasic-windows-latest
+lead_directory_missing = true
+patch_directory = libpcanbasic-windows
+
+source_url = https://www.peak-system.com/fileadmin/media/files/pcan-basic.zip
+source_filename = pcan-basic.zip
+source_hash = 088ea54ce2d2563840391c7d18a3798a44bd524470e5008a63076f18adda6aab

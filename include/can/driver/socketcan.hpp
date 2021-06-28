@@ -6,6 +6,10 @@
 
 #include "can/transceiver.hpp"
 
+#if !defined(BUILD_LINUX)
+#error "This driver only works under Linux"
+#endif
+
 namespace can::driver {
 
 class socketcan;

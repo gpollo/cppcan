@@ -5,6 +5,27 @@ project('can', ['cpp'],
     version: 'latest',
 )
 
+cpp_flags = []
+
+#########################
+# drivers configuration #
+#########################
+
+if host_machine.system() == 'linux'
+    cpp_flags += '-DBUILD_LINUX'
+    enable_driver_socketcan = true
+    enable_driver_pcan      = true
+    libpcanbasic_subproject = subproject('libpcanbasic-linux')
+elif host_machine.system() == 'windows'
+    cpp_flags += '-DBUILD_WINDOWS'
+    enable_driver_socketcan = false
+    enable_driver_pcan      = true
+    libpcanbasic_subproject = subproject('libpcanbasic-windows')
+endif
+
+cpp_flags += (enable_driver_socketcan) ? '-DENABLE_DRIVER_SOCKETCAN'  : []
+cpp_flags += (enable_driver_pcan)      ? '-DENABLE_DRIVER_PCAN'       : []
+
 ##################
 # static library #
 ##################
@@ -14,12 +35,25 @@ can_includes = [
 ]
 
 can_sources = [
+    (enable_driver_socketcan) ? 'source/driver/socketcan.cpp' : [],
+    (enable_driver_pcan)      ? 'source/driver/pcan.cpp'      : [],
     'source/driver/socketcan.cpp',
     'source/frame.cpp',
 ]
 
+can_deps = [
+    (enable_driver_pcan) ? libpcanbasic_subproject.get_variable('libpcanbasic_dep') : [],
+]
+
 can_static = static_library('can', can_sources,
     include_directories: can_includes,
+    dependencies: can_deps,
+    cpp_args: cpp_flags,
+)
+
+can_dep = declare_dependency(
+    include_directories: can_includes,
+    link_with: can_static,
 )
 
 subdir('tests')
