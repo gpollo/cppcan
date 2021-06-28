@@ -1,0 +1,6 @@
+.cache/
+build/
+compile_commands.json
+subprojects/libpcanbasic-linux-*/
+subprojects/libpcanbasic-windows-*/
+subprojects/packagecache/
