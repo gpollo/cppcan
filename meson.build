@@ -13,18 +13,22 @@ cpp_flags = []
 
 if host_machine.system() == 'linux'
     cpp_flags += '-DBUILD_LINUX'
-    enable_driver_socketcan = true
-    enable_driver_pcan      = true
-    libpcanbasic_subproject = subproject('libpcanbasic-linux')
+    enable_driver_socketcan   = true
+    enable_driver_pcan        = true
+    enable_driver_candlelight = false
+    libpcanbasic_subproject   = subproject('libpcanbasic-linux')
 elif host_machine.system() == 'windows'
     cpp_flags += '-DBUILD_WINDOWS'
-    enable_driver_socketcan = false
-    enable_driver_pcan      = true
-    libpcanbasic_subproject = subproject('libpcanbasic-windows')
+    enable_driver_socketcan   = false
+    enable_driver_pcan        = true
+    enable_driver_candlelight = true
+    libpcanbasic_subproject   = subproject('libpcanbasic-windows')
+    libcandleapi_subproject   = subproject('libcandleapi')
 endif
 
-cpp_flags += (enable_driver_socketcan) ? '-DENABLE_DRIVER_SOCKETCAN'  : []
-cpp_flags += (enable_driver_pcan)      ? '-DENABLE_DRIVER_PCAN'       : []
+cpp_flags += (enable_driver_socketcan)   ? '-DENABLE_DRIVER_SOCKETCAN'  : []
+cpp_flags += (enable_driver_pcan)        ? '-DENABLE_DRIVER_PCAN'       : []
+cpp_flags += (enable_driver_candlelight) ? '-DENABLE_DRIVER_CANDLELIGHT': []
 
 ##################
 # static library #
@@ -35,14 +39,16 @@ can_includes = [
 ]
 
 can_sources = [
-    (enable_driver_socketcan) ? 'source/driver/socketcan.cpp' : [],
-    (enable_driver_pcan)      ? 'source/driver/pcan.cpp'      : [],
+    (enable_driver_socketcan)   ? 'source/driver/socketcan.cpp'   : [],
+    (enable_driver_pcan)        ? 'source/driver/pcan.cpp'        : [],
+    (enable_driver_candlelight) ? 'source/driver/candlelight.cpp' : [],
     'source/driver/socketcan.cpp',
     'source/frame.cpp',
 ]
 
 can_deps = [
-    (enable_driver_pcan) ? libpcanbasic_subproject.get_variable('libpcanbasic_dep') : [],
+    (enable_driver_pcan)        ? libpcanbasic_subproject.get_variable('libpcanbasic_dep') : [],
+    (enable_driver_candlelight) ? libcandleapi_subproject.get_variable('libcandleapi_dep') : [],
 ]
 
 can_static = static_library('can', can_sources,
