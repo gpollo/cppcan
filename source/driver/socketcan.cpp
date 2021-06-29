@@ -10,6 +10,7 @@
 
 #include "can/driver/socketcan.hpp"
 #include "can/log.hpp"
+#include "can/utils/crop_cast.hpp"
 
 namespace can::driver {
 
@@ -98,7 +99,7 @@ frame::ptr socketcan::receive(long timeout_ms) {
     while (count <= 0) {
         pollfd pfd = {.fd = socket_, .events = POLLIN};
 
-        count = poll(&pfd, 1, (int)timeout_ms);
+        count = poll(&pfd, 1, utils::crop_cast<long, int>(timeout_ms));
         if (count < 0) {
             if (errno == EINTR) {
                 continue;

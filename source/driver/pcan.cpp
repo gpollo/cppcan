@@ -12,8 +12,10 @@
 #endif /* BUILD_WINDOWS */
 
 #include "PCANBasic.h"
+
 #include "can/driver/pcan.hpp"
 #include "can/log.hpp"
+#include "can/utils/crop_cast.hpp"
 
 extern "C" {
 
@@ -137,7 +139,7 @@ frame::ptr pcan::receive(long timeout_ms) {
     while (count <= 0) {
         pollfd pfd = {.fd = event_, .events = POLLIN};
 
-        count = poll(&pfd, 1, (int)timeout_ms);
+        count = poll(&pfd, 1, utils::crop_cast<long, int>(timeout_ms));
         if (count < 0) {
             if (errno == EINTR) {
                 continue;
@@ -154,7 +156,7 @@ frame::ptr pcan::receive(long timeout_ms) {
 #endif /* BUILD_LINUX */
 
 #ifdef BUILD_WINDOWS
-    if (WaitForSingleObject(event_, (DWORD)timeout_ms) == WAIT_FAILED) {
+    if (WaitForSingleObject(event_, utils::crop_cast<long, DWORD>(timeout_ms)) == WAIT_FAILED) {
         CAN_LOG_ERROR("wait_for_single_object: failed");
         return nullptr;
     }
