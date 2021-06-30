@@ -17,6 +17,7 @@ using socketcan_ptr = std::shared_ptr<socketcan>;
 
 class socketcan : public transceiver {
    public:
+    static interface_list_ptr list_interfaces();
     static socketcan_ptr create(const std::string& interface);
     ~socketcan() override;
 

@@ -1,6 +1,7 @@
 #include <array>
 #include <cassert>
 #include <cstdio>
+#include <iostream>
 #include <utility>
 
 #include "can/driver/socketcan.hpp"
@@ -13,15 +14,15 @@ static void print_message(can::frame::ptr msg) {
     printf("}\n");
 }
 
-int main() {
-    auto transceiver1 = can::driver::socketcan::create("vcan0");
+static void test_interface(const std::string& device) {
+    auto transceiver1 = can::driver::socketcan::create(device);
     assert(transceiver1 != nullptr);
 
-    auto transceiver2 = can::driver::socketcan::create("vcan0");
+    auto transceiver2 = can::driver::socketcan::create(device);
     assert(transceiver2 != nullptr);
 
     for (int i = 0; i < 100; i++) {
-        std::array<uint8_t, 8> bytes;
+        std::array<uint8_t, 8> bytes{};
         bytes[0]      = (2 * i) % 255;
         bytes[1]      = (4 * i) % 255;
         bytes[2]      = (5 * i) % 255;
@@ -45,6 +46,20 @@ int main() {
         }
 
         print_message(std::move(recv_msg));
+    }
+}
+
+int main() {
+    auto interfaces = can::driver::socketcan::list_interfaces();
+    if (interfaces->empty()) {
+        std::cout << "No interface found" << std::endl;
+        return 0;
+    }
+
+    for (const auto& interface : *interfaces) {
+        std::cout << "Testing interface '" << interface << "'" << std::endl;
+        test_interface(interface);
+        std::cout << std::endl;
     }
 
     return 0;

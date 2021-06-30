@@ -1,9 +1,14 @@
 #ifndef INCLUDE_CAN_TRANSCEIVER_HPP
 #define INCLUDE_CAN_TRANSCEIVER_HPP
 
+#include <list>
+#include <memory>
+
 #include "can/frame.hpp"
 
 namespace can {
+
+using interface_list_ptr = std::unique_ptr<std::list<std::string>>;
 
 class transceiver {
    public:
