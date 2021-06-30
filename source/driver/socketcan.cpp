@@ -10,6 +10,9 @@
 #include <filesystem>
 #include <iostream>
 #include <regex>
+#include <utility>
+
+#include "libsocketcan.h"
 
 #include "can/driver/socketcan.hpp"
 #include "can/log.hpp"
@@ -63,7 +66,7 @@ socketcan_ptr socketcan::create(const std::string& interface) {
         goto bind_failed;
     }
 
-    return socketcan_ptr(new socketcan(sock));
+    return socketcan_ptr(new socketcan(sock, interface));
 
 bind_failed:
 ioctl_failed:
@@ -74,12 +77,28 @@ socket_failed:
     return nullptr;
 }
 
-socketcan::socketcan(int socket) : socket_(socket) {}
+socketcan::socketcan(int socket, std::string interface) : socket_(socket), interface_(std::move(interface)) {}
 
 socketcan::~socketcan() {
     if (close(socket_) < 0) {
         logger->error("could not close socket: {}", strerror(errno));
     }
+}
+
+bool socketcan::set_bitrate(unsigned long bitrate) {
+    constexpr auto MAX_BITRATE = static_cast<unsigned long>(std::numeric_limits<uint32_t>::max());
+
+    if (bitrate > MAX_BITRATE) {
+        logger->error("invalid bitrate specified");
+        return false;
+    }
+
+    if (can_set_bitrate(interface_.c_str(), static_cast<unsigned long>(bitrate)) < 0) {
+        logger->error("could not set bitrate");
+        return false;
+    }
+
+    return true;
 }
 
 bool socketcan::transmit(frame::ptr msg) {

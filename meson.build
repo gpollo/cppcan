@@ -17,6 +17,7 @@ if host_machine.system() == 'linux'
     enable_driver_pcan        = true
     enable_driver_candlelight = false
     libpcanbasic_subproject   = subproject('libpcanbasic-linux')
+    libsocketcan_subproject   = subproject('libsocketcan')
 elif host_machine.system() == 'windows'
     cpp_flags += '-DBUILD_WINDOWS'
     enable_driver_socketcan   = false
@@ -50,6 +51,7 @@ can_sources = [
 ]
 
 can_deps = [
+    (enable_driver_socketcan)   ? libsocketcan_subproject.get_variable('libsocketcan_dep') : [],
     (enable_driver_pcan)        ? libpcanbasic_subproject.get_variable('libpcanbasic_dep') : [],
     (enable_driver_candlelight) ? libcandleapi_subproject.get_variable('libcandleapi_dep') : [],
     spdlog_subproject.get_variable('spdlog_dep'),

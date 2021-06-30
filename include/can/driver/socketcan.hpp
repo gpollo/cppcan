@@ -21,14 +21,16 @@ class socketcan : public transceiver {
     static socketcan_ptr create(const std::string& interface);
     ~socketcan() override;
 
+    bool set_bitrate(unsigned long bitrate);
     bool transmit(frame::ptr msg) override;
     frame::ptr receive(long timeout_ms = -1) override;
 
    private:
     const int socket_;
+    const std::string interface_;
     std::mutex receive_mutex_;
 
-    socketcan(int socket);
+    socketcan(int socket, std::string interface);
 };
 
 } /* namespace can::driver */

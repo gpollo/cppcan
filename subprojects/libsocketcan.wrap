@@ -1,0 +1,7 @@
+[wrap-git]
+directory = libsocketcan-git
+lead_directory_missing = true
+patch_directory = libsocketcan
+
+url = https://github.com/lalten/libsocketcan.git
+revision = head
