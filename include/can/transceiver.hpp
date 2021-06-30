@@ -13,6 +13,7 @@ using interface_list_ptr = std::unique_ptr<std::list<std::string>>;
 class transceiver {
    public:
     virtual ~transceiver()                           = default;
+    virtual bool set_bitrate(unsigned long bitrate)  = 0;
     virtual bool transmit(frame::ptr msg)            = 0;
     virtual frame::ptr receive(long timeout_ms = -1) = 0;
 };

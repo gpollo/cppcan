@@ -27,7 +27,7 @@ class pcan : public transceiver {
     static pcan_ptr create(const std::string& interface);
     ~pcan() override;
 
-    bool set_bitrate(unsigned long bitrate);
+    bool set_bitrate(unsigned long bitrate) override;
     bool transmit(frame::ptr msg) override;
     frame::ptr receive(long timeout_ms = -1) override;
 

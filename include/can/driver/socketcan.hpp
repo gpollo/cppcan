@@ -21,7 +21,7 @@ class socketcan : public transceiver {
     static socketcan_ptr create(const std::string& interface);
     ~socketcan() override;
 
-    bool set_bitrate(unsigned long bitrate);
+    bool set_bitrate(unsigned long bitrate) override;
     bool transmit(frame::ptr msg) override;
     frame::ptr receive(long timeout_ms = -1) override;
 
