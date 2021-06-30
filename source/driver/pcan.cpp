@@ -109,6 +109,24 @@ pcan::~pcan() {
     }
 }
 
+bool pcan::set_bitrate(unsigned long bitrate) {
+    constexpr auto MAX_BITRATE = static_cast<unsigned long>(std::numeric_limits<uint32_t>::max());
+
+    if (bitrate > MAX_BITRATE) {
+        logger->error("invalid bitrate specified");
+        return false;
+    }
+
+    uint32_t buffer    = bitrate;
+    TPCANStatus status = CAN_SetValue(device_, PCAN_BITRATE_INFO, &buffer, sizeof(buffer));
+    if (status != PCAN_ERROR_OK) {
+        logger->error("could not set bitrate: {}", get_error(status));
+        return false;
+    }
+
+    return true;
+}
+
 bool pcan::transmit(frame::ptr msg) {
     if (msg->length_ > MAX_DLC) {
         logger->error("invalid message length");
