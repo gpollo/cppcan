@@ -4,10 +4,12 @@
 #include <cstdint>
 #include <memory>
 
+#include "can/utils/array_delete.hpp"
+
 namespace can {
 
 struct frame {
-    using ptr = std::unique_ptr<frame>;
+    using ptr = std::unique_ptr<frame, utils::array_delete<uint8_t>>;
 
     uint32_t identifier_;
     uint64_t timestamp_;
