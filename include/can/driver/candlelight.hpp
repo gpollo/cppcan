@@ -19,6 +19,7 @@ class candlelight : public transceiver {
     static candlelight_ptr create(uint8_t device);
     ~candlelight() override;
 
+    bool set_bitrate(unsigned long bitrate);
     bool transmit(frame::ptr msg) override;
     frame::ptr receive(long timeout_ms = -1) override;
 

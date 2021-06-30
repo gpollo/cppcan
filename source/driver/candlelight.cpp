@@ -98,6 +98,22 @@ candlelight::~candlelight() {
     candle_dev_close(handle_);
 }
 
+bool candlelight::set_bitrate(unsigned long bitrate) {
+    constexpr auto MAX_BITRATE = static_cast<unsigned long>(std::numeric_limits<uint32_t>::max());
+
+    if (bitrate > MAX_BITRATE) {
+        logger->error("invalid bitrate specified");
+        return false;
+    }
+
+    if (!candle_channel_set_bitrate(handle_, 0, static_cast<uint32_t>(bitrate))) {
+        logger->error("could not set bitrate: {}", get_error(handle_));
+        return false;
+    }
+
+    return true;
+}
+
 bool candlelight::transmit(frame::ptr msg) {
     if (msg->length_ > MAX_DLC) {
         logger->error("unsupported message length of '{}'", msg->length_);
