@@ -1,0 +1,7 @@
+[wrap-git]
+directory = lexy-git
+lead_directory_missing = true
+patch_directory = lexy
+
+url = https://github.com/foonathan/lexy.git
+revision = head

@@ -5,7 +5,7 @@ project('can', ['cpp'],
     version: 'latest',
 )
 
-cpp_flags = []
+cpp_flags = ['-Wno-unused-local-typedefs']
 
 #########################
 # drivers configuration #
@@ -31,6 +31,7 @@ cpp_flags += (enable_driver_socketcan)   ? '-DENABLE_DRIVER_SOCKETCAN'  : []
 cpp_flags += (enable_driver_pcan)        ? '-DENABLE_DRIVER_PCAN'       : []
 cpp_flags += (enable_driver_candlelight) ? '-DENABLE_DRIVER_CANDLELIGHT': []
 
+lexy_subproject = subproject('lexy')
 spdlog_subproject = subproject('spdlog')
 
 ##################
@@ -54,6 +55,7 @@ can_deps = [
     (enable_driver_socketcan)   ? libsocketcan_subproject.get_variable('libsocketcan_dep') : [],
     (enable_driver_pcan)        ? libpcanbasic_subproject.get_variable('libpcanbasic_dep') : [],
     (enable_driver_candlelight) ? libcandleapi_subproject.get_variable('libcandleapi_dep') : [],
+    lexy_subproject.get_variable('lexy_dep'),
     spdlog_subproject.get_variable('spdlog_dep'),
 ]
 

@@ -1,6 +1,7 @@
 .cache/
 build/
 compile_commands.json
+subprojects/lexy-*/
 subprojects/libcandleapi-*/
 subprojects/libpcanbasic-linux-*/
 subprojects/libpcanbasic-windows-*/
