@@ -76,6 +76,19 @@ test('can/database/dbc/grammar/requirements',
     )
 )
 
+#######################################
+# can::database::dbc::grammar::signal #
+#######################################
+
+test('can/database/dbc/grammar/signal',
+    executable('test_signal', ['signal.cpp'],
+        include_directories: can_includes,
+        dependencies: can_deps,
+        link_with: can_static,
+        cpp_args: cpp_flags,
+    )
+)
+
 ###########################################
 # can::database::dbc::grammar::speed test #
 ###########################################
