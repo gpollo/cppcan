@@ -50,6 +50,7 @@ can_sources = [
     'source/database/dbc/ast/database.cpp',
     'source/database/dbc/ast/message.cpp',
     'source/database/dbc/ast/signal.cpp',
+    'source/database/dbc/database.cpp',
     'source/database/dbc/message.cpp',
     'source/database/dbc/node.cpp',
     'source/database/dbc/object.cpp',
