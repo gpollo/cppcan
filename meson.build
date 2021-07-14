@@ -31,6 +31,7 @@ cpp_flags += (enable_driver_socketcan)   ? '-DENABLE_DRIVER_SOCKETCAN'  : []
 cpp_flags += (enable_driver_pcan)        ? '-DENABLE_DRIVER_PCAN'       : []
 cpp_flags += (enable_driver_candlelight) ? '-DENABLE_DRIVER_CANDLELIGHT': []
 
+fmt_subproject = subproject('fmt')
 lexy_subproject = subproject('lexy')
 spdlog_subproject = subproject('spdlog')
 
