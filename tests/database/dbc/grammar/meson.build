@@ -50,6 +50,19 @@ test('can/database/dbc/grammar/speed',
     )
 )
 
+#######################################################
+# can::database::dbc::grammar::value_definitions test #
+#######################################################
+
+test('can/database/dbc/grammar/value_definitions',
+    executable('test_value_definitions', ['value_definitions.cpp'],
+        include_directories: can_includes,
+        dependencies: can_deps,
+        link_with: can_static,
+        cpp_args: cpp_flags,
+    )
+)
+
 ############################################################
 # can::database::dbc::grammar::value_table_definition test #
 ############################################################
