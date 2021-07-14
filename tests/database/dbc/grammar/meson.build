@@ -36,3 +36,16 @@ test('can/database/dbc/grammar/attribute',
         cpp_args: cpp_flags,
     )
 )
+
+#############################################
+# can::database::dbc::grammar::version test #
+#############################################
+
+test('can/database/dbc/grammar/version',
+    executable('test_version', ['version.cpp'],
+        include_directories: can_includes,
+        dependencies: can_deps,
+        link_with: can_static,
+        cpp_args: cpp_flags,
+    )
+)
