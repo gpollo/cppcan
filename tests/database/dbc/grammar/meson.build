@@ -37,6 +37,19 @@ test('can/database/dbc/grammar/attribute',
     )
 )
 
+#################################################
+# can::database::dbc::grammar::description test #
+#################################################
+
+test('can/database/dbc/grammar/description',
+    executable('test_description', ['description.cpp'],
+        include_directories: can_includes,
+        dependencies: can_deps,
+        link_with: can_static,
+        cpp_args: cpp_flags,
+    )
+)
+
 ###########################################
 # can::database::dbc::grammar::speed test #
 ###########################################
