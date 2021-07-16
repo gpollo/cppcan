@@ -5,3 +5,4 @@ subprojects/libcandleapi-*/
 subprojects/libpcanbasic-linux-*/
 subprojects/libpcanbasic-windows-*/
 subprojects/packagecache/
+subprojects/spdlog-*/

@@ -1,14 +1,12 @@
 #ifndef INCLUDE_CAN_LOG_HPP
 #define INCLUDE_CAN_LOG_HPP
 
-#include <cerrno>
-#include <cstdio>
+#include <spdlog/spdlog.h>
 
-/* NOLINTNEXTLINE(cppcoreguidelines-macro-usage): required for __FILE__ and __LINE__ */
-#define CAN_LOG_PERROR(func) fprintf(stderr, "%s:%d:" func ": %s\n", __FILE__, __LINE__, strerror(errno))
+namespace can {
 
-/* NOLINTNEXTLINE(cppcoreguidelines-macro-usage): required for __FILE__ and __LINE__ */
-#define CAN_LOG_ERROR(func_n_reason, ...) \
-    fprintf(stderr, "%s:%d:" func_n_reason "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+extern std::shared_ptr<spdlog::logger> logger;
+
+} /* namespace can */
 
 #endif /* INCLUDE_CAN_LOG_HPP */

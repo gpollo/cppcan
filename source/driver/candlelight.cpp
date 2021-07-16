@@ -44,16 +44,9 @@ static const std::map<candle_err_t, std::string> ERROR_TO_STRING = {
 
 static constexpr unsigned int MAX_DLC = 8;
 
-/* NOLINTNEXTLINE(cppcoreguidelines-macro-usage): required for __FILE__ and __LINE__ */
-#define CANDLE_LOG_ERROR(func, handle)                                                   \
-    {                                                                                    \
-        if (handle == nullptr) {                                                         \
-            fprintf(stderr, "%s:%d:" func ": Unknown error\n", __FILE__, __LINE__);      \
-        } else {                                                                         \
-            const std::string& text = ERROR_TO_STRING.at(candle_dev_last_error(handle)); \
-            fprintf(stderr, "%s:%d:" func ": %s\n", __FILE__, __LINE__, text.data());    \
-        }                                                                                \
-    }
+static std::string get_error(candle_handle handle) {
+    return ERROR_TO_STRING.at(candle_dev_last_error(handle));
+}
 
 candlelight_ptr candlelight::create(uint8_t device) {
     candle_list_handle handle_list = nullptr;
@@ -61,27 +54,27 @@ candlelight_ptr candlelight::create(uint8_t device) {
     candle_devstate_t state        = CANDLE_DEVSTATE_INUSE;
 
     if (!candle_list_scan(&handle_list)) {
-        CAN_LOG_ERROR("candle_list_scan: ERROR_UNKNOWN");
+        logger->error("could not list candle devices: UNKNOWN_ERROR");
         goto candle_list_scan_failed;
     }
 
     if (!candle_dev_get(handle_list, device, &handle)) {
-        CANDLE_LOG_ERROR("candle_dev_get", handle);
+        logger->error("could not get candle device '{}': {}", device, get_error(handle));
         goto candle_dev_get_failed;
     }
 
     if (!candle_dev_get_state(handle, &state)) {
-        CANDLE_LOG_ERROR("candle_dev_get_state", handle);
+        logger->error("could not get candle device '{}': {}", device, get_error(handle));
         goto candle_dev_get_state_failed;
     }
 
     if (state == CANDLE_DEVSTATE_INUSE) {
-        CAN_LOG_ERROR("create: Device already in use");
+        logger->error("could not get candle device '{}': DEVSTATE_INUSE", device);
         goto device_in_use;
     }
 
     if (!candle_dev_open(handle)) {
-        CANDLE_LOG_ERROR("candle_dev_open", handle);
+        logger->error("could not open candle device '{}': {}", get_error(handle));
         goto candle_dev_open_failed;
     }
 
@@ -107,7 +100,7 @@ candlelight::~candlelight() {
 
 bool candlelight::transmit(frame::ptr msg) {
     if (msg->length_ > MAX_DLC) {
-        CAN_LOG_ERROR("transmit: Unsupported data length of %llu", msg->length_);
+        logger->error("unsupported message length of '{}'", msg->length_);
         return false;
     }
 
@@ -119,7 +112,7 @@ bool candlelight::transmit(frame::ptr msg) {
     std::copy(msg->bytes_, msg->bytes_ + msg->length_, frame.data);
 
     if (!candle_frame_send(handle_, 0, &frame)) {
-        CANDLE_LOG_ERROR("candle_frame_send", handle_);
+        logger->error("could not send frame: {}", get_error(handle_));
         return false;
     }
 
@@ -129,13 +122,13 @@ bool candlelight::transmit(frame::ptr msg) {
 frame::ptr candlelight::receive(long timeout_ms) {
     candle_frame_t frame;
     if (!candle_frame_read(handle_, &frame, utils::crop_cast<long, uint32_t>(timeout_ms))) {
-        CANDLE_LOG_ERROR("candle_frame_read", handle_);
+        logger->error("could not read frame: {}", get_error(handle_));
         return nullptr;
     }
 
     if (frame.timestamp_us == 0) {
         if (!candle_dev_get_timestamp_us(handle_, &frame.timestamp_us)) {
-            CANDLE_LOG_ERROR("candle_dev_get_timestamp_us", handle_);
+            logger->error("could get timestamp: {}", get_error(handle_));
             return nullptr;
         }
     }

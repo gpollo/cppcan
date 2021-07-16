@@ -52,13 +52,11 @@ static constexpr uint64_t MSEC_TO_USEC = 1e3;
 static constexpr uint32_t SHIFT32      = 32;
 static constexpr unsigned int MAX_DLC  = 8;
 
-/* NOLINTNEXTLINE(cppcoreguidelines-macro-usage): required for __FILE__ and __LINE__ */
-#define PCAN_LOG_ERROR(func, status)                                                           \
-    {                                                                                          \
-        std::array<char, 256> pcan_error_buffer{};                                             \
-        pcanbasic_get_error_text(status, 9, pcan_error_buffer.data());                         \
-        fprintf(stderr, "%s:%d:" func ": %s\n", __FILE__, __LINE__, pcan_error_buffer.data()); \
-    }
+static std::string get_error(TPCANStatus status) {
+    std::array<char, 256> pcan_error_buffer{};
+    pcanbasic_get_error_text(status, 9, pcan_error_buffer.data());
+    return std::string(pcan_error_buffer.data());
+}
 
 pcan_ptr pcan::create(const std::string& interface) {
 #ifdef BUILD_LINUX
@@ -73,20 +71,20 @@ pcan_ptr pcan::create(const std::string& interface) {
     TPCANStatus status  = 0;
 
     if (!INTERFACE_TO_DEVICE.contains(interface)) {
-        CAN_LOG_ERROR("create: Invalid interface");
+        logger->error("invalid specified interface '{}'", interface);
         goto invalid_interface;
     }
     device = INTERFACE_TO_DEVICE.at(interface);
 
     status = CAN_Initialize(device, PCAN_BAUD_500K, 0, 0, 0);
     if (status != PCAN_ERROR_OK) {
-        PCAN_LOG_ERROR("initialize", status);
+        logger->error("could not initialize interface '{}': {}", interface, get_error(status));
         goto initialize_failed;
     }
 
     status = CAN_GetValue(device, PCAN_RECEIVE_EVENT, &event, sizeof(event));
     if (status != PCAN_ERROR_OK) {
-        PCAN_LOG_ERROR("get_value", status);
+        logger->error("could not get event of interface '{}': {}", interface, get_error(status));
         goto get_value_failed;
     }
 
@@ -95,7 +93,7 @@ pcan_ptr pcan::create(const std::string& interface) {
 get_value_failed:
     status = CAN_Uninitialize(device);
     if (status != PCAN_ERROR_OK) {
-        PCAN_LOG_ERROR("uninitialize", status);
+        logger->error("could not uninitialize interface '{}': {}", interface, get_error(status));
     }
 initialize_failed:
 invalid_interface:
@@ -107,13 +105,13 @@ pcan::pcan(unsigned int device, event_type event) : device_(device), event_(even
 pcan::~pcan() {
     TPCANStatus status = CAN_Uninitialize(device_);
     if (status != PCAN_ERROR_OK) {
-        PCAN_LOG_ERROR("uninitialize", status);
+        logger->error("could not uninitialize interface: {}", get_error(status));
     }
 }
 
 bool pcan::transmit(frame::ptr msg) {
     if (msg->length_ > MAX_DLC) {
-        CAN_LOG_ERROR("transmit: Unsupported data length");
+        logger->error("invalid message length");
         return false;
     }
 
@@ -126,7 +124,7 @@ bool pcan::transmit(frame::ptr msg) {
 
     TPCANStatus status = CAN_Write(device_, &frame);
     if (status != PCAN_ERROR_OK) {
-        PCAN_LOG_ERROR("write", status);
+        logger->error("could not write message: {}", get_error(status));
         return false;
     }
 
@@ -145,7 +143,7 @@ frame::ptr pcan::receive(long timeout_ms) {
                 continue;
             }
 
-            CAN_LOG_PERROR("poll");
+            logger->error("could not poll socket: {}", strerror(errno));
             return nullptr;
         }
 
@@ -157,7 +155,7 @@ frame::ptr pcan::receive(long timeout_ms) {
 
 #ifdef BUILD_WINDOWS
     if (WaitForSingleObject(event_, utils::crop_cast<long, DWORD>(timeout_ms)) == WAIT_FAILED) {
-        CAN_LOG_ERROR("wait_for_single_object: failed");
+        logger->error("failed to wait for event");
         return nullptr;
     }
 #endif /* BUILD_WINDOWS */
@@ -167,7 +165,7 @@ frame::ptr pcan::receive(long timeout_ms) {
     TPCANStatus status = CAN_Read(device_, &frame, &ts);
     if (status != PCAN_ERROR_OK) {
         if (status != PCAN_ERROR_QRCVEMPTY) {
-            PCAN_LOG_ERROR("read", status);
+            logger->error("could not read message: {}", get_error(status));
         }
 
         return nullptr;

@@ -22,14 +22,14 @@ socketcan_ptr socketcan::create(const std::string& interface) {
 
     int sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (sock < 0) {
-        CAN_LOG_PERROR("socket");
+        logger->error("could not create socket: {}", strerror(errno));
         goto socket_failed;
     }
 
     /* retrieve the interface index */
     strncpy(ifr.ifr_name, interface.c_str(), interface.size() + 1);
     if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
-        CAN_LOG_PERROR("ioctl");
+        logger->error("could not retrieve the interface '{}': {}", interface, strerror(errno));
         goto ioctl_failed;
     }
 
@@ -39,7 +39,7 @@ socketcan_ptr socketcan::create(const std::string& interface) {
 
     /* NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast): library type */
     if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        CAN_LOG_PERROR("bind");
+        logger->error("could not bind socket from the interface '{}': {}", interface, strerror(errno));
         goto bind_failed;
     }
 
@@ -48,7 +48,7 @@ socketcan_ptr socketcan::create(const std::string& interface) {
 bind_failed:
 ioctl_failed:
     if (close(sock) < 0) {
-        CAN_LOG_PERROR("close");
+        logger->error("could not close socket of interface '{}': {}", interface, strerror(errno));
     }
 socket_failed:
     return nullptr;
@@ -58,13 +58,13 @@ socketcan::socketcan(int socket) : socket_(socket) {}
 
 socketcan::~socketcan() {
     if (close(socket_) < 0) {
-        CAN_LOG_PERROR("close");
+        logger->error("could not close socket: {}", strerror(errno));
     }
 }
 
 bool socketcan::transmit(frame::ptr msg) {
     if (CAN_MAX_DLEN < msg->length_) {
-        CAN_LOG_ERROR("transmit: Invalid length");
+        logger->error("invalid message length");
         return false;
     }
 
@@ -76,12 +76,12 @@ bool socketcan::transmit(frame::ptr msg) {
 
     ssize_t length = write(socket_, &frame, sizeof(frame));
     if (length < 0) {
-        CAN_LOG_PERROR("write");
+        logger->error("could not write to socket: {}", strerror(errno));
         return false;
     }
 
     if (static_cast<size_t>(length) < sizeof(frame)) {
-        CAN_LOG_ERROR("transmit: Invalid length");
+        logger->error("invalid length written");
         return false;
     }
 
@@ -105,7 +105,7 @@ frame::ptr socketcan::receive(long timeout_ms) {
                 continue;
             }
 
-            CAN_LOG_PERROR("poll");
+            logger->error("could not poll socket: {}", strerror(errno));
             return nullptr;
         }
 
@@ -117,18 +117,18 @@ frame::ptr socketcan::receive(long timeout_ms) {
     can_frame frame{};
     ssize_t length = read(socket_, &frame, sizeof(frame));
     if (length < 0) {
-        CAN_LOG_PERROR("read");
+        logger->error("could not read socket: {}", strerror(errno));
         return nullptr;
     }
 
     if (static_cast<size_t>(length) < sizeof(frame)) {
-        CAN_LOG_ERROR("receive: Invalid length");
+        logger->error("invalid length received");
         return nullptr;
     }
 
     timeval tv{};
     if (ioctl(socket_, SIOCGSTAMP, &tv) < 0) {
-        CAN_LOG_PERROR("ioctl");
+        logger->error("could not read message timestamp: {}", strerror(errno));
         return nullptr;
     }
     uint64_t timestamp = tv.tv_sec * SEC_TO_USEC + tv.tv_usec;

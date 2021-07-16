@@ -30,6 +30,8 @@ cpp_flags += (enable_driver_socketcan)   ? '-DENABLE_DRIVER_SOCKETCAN'  : []
 cpp_flags += (enable_driver_pcan)        ? '-DENABLE_DRIVER_PCAN'       : []
 cpp_flags += (enable_driver_candlelight) ? '-DENABLE_DRIVER_CANDLELIGHT': []
 
+spdlog_subproject = subproject('spdlog')
+
 ##################
 # static library #
 ##################
@@ -44,11 +46,13 @@ can_sources = [
     (enable_driver_candlelight) ? 'source/driver/candlelight.cpp' : [],
     'source/driver/socketcan.cpp',
     'source/frame.cpp',
+    'source/log.cpp',
 ]
 
 can_deps = [
     (enable_driver_pcan)        ? libpcanbasic_subproject.get_variable('libpcanbasic_dep') : [],
     (enable_driver_candlelight) ? libcandleapi_subproject.get_variable('libcandleapi_dep') : [],
+    spdlog_subproject.get_variable('spdlog_dep'),
 ]
 
 can_static = static_library('can', can_sources,
