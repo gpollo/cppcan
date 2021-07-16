@@ -87,6 +87,29 @@ can_dep = declare_dependency(
 
 subdir('tests')
 
+###########
+# candump #
+###########
+
+candump_includes = [
+    include_directories('include'),
+]
+
+candump_sources = [
+    'source/candump/main.cpp'
+]
+
+candump_deps = [
+    fmt_subproject.get_variable('fmt_dep'),
+]
+
+candump = executable('candump', candump_sources,
+    include_directories: candump_includes,
+    dependencies: candump_deps,
+    link_with: can_static,
+    cpp_args: cpp_flags,
+)
+
 #################
 # format target #
 #################
