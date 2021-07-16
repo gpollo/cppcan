@@ -47,6 +47,7 @@ can_sources = [
     (enable_driver_socketcan)   ? 'source/driver/socketcan.cpp'   : [],
     (enable_driver_pcan)        ? 'source/driver/pcan.cpp'        : [],
     (enable_driver_candlelight) ? 'source/driver/candlelight.cpp' : [],
+    'source/database/database.cpp',
     'source/database/dbc/ast/attribute_definition.cpp',
     'source/database/dbc/ast/database.cpp',
     'source/database/dbc/ast/message.cpp',

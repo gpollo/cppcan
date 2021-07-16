@@ -1,6 +1,8 @@
 #ifndef INCLUDE_CAN_DATABASE_DATABASE_HPP
 #define INCLUDE_CAN_DATABASE_DATABASE_HPP
 
+#include <filesystem>
+
 #include "can/database/message.hpp"
 
 namespace can::database {
@@ -8,6 +10,8 @@ namespace can::database {
 class database {
    public:
     using ptr = std::shared_ptr<database>;
+
+    static ptr create(const std::filesystem::path& path);
 
     virtual ~database() = default;
 
