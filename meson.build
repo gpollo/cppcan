@@ -49,6 +49,8 @@ can_sources = [
     'source/driver/socketcan.cpp',
     'source/frame.cpp',
     'source/log.cpp',
+    'source/transceiver.cpp',
+    'source/utils/quark.cpp',
 ]
 
 can_deps = [
