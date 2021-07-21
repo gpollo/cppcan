@@ -20,7 +20,7 @@ class database : public can::database::database, public object {
              std::map<std::string, int64_t> integer_attributes, std::map<std::string, float> float_attributes,
              std::map<std::string, std::string> string_attributes);
 
-    /* inherited methods from can::database::message */
+    /* inherited methods from can::database */
 
     [[nodiscard]] std::vector<can::database::message::const_ptr> get_messages() const override;
     [[nodiscard]] can::database::message::const_ptr get_message(unsigned int identifier) const override;

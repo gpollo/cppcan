@@ -48,6 +48,7 @@ can_sources = [
     (enable_driver_pcan)        ? 'source/can/driver/pcan.cpp'        : [],
     (enable_driver_candlelight) ? 'source/can/driver/candlelight.cpp' : [],
     'source/can/database.cpp',
+    'source/can/databases.cpp',
     'source/can/format/dbc/ast/attribute_definition.cpp',
     'source/can/format/dbc/ast/database.cpp',
     'source/can/format/dbc/ast/message.cpp',
