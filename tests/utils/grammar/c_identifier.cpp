@@ -2,8 +2,8 @@
 #include <optional>
 #include <string>
 
+#include "lexy/action/parse.hpp"
 #include "lexy/input/string_input.hpp"
-#include "lexy/parse.hpp"
 
 #include "can/utils/grammar/c_identifier.hpp"
 

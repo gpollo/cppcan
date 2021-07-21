@@ -3,7 +3,7 @@
 
 #include "fmt/core.h"
 
-#include "can/database/database.hpp"
+#include "can/database.hpp"
 #include "can/transceiver.hpp"
 
 namespace arg {
