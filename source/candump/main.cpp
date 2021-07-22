@@ -130,10 +130,11 @@ int main(int argc, const char* argv[]) {
         database = can::database::database::create(arg::database);
     }
 
-    auto transceiver = can::transceiver::create("socketcan", "vcan0");
-    if (transceiver == nullptr) {
+    auto transceiver_ptr = can::transceiver::create("socketcan", "vcan0");
+    if (transceiver_ptr == nullptr) {
         exit(1);
     }
+    auto transceiver = transceiver_ptr.get_unique_transceiver();
 
     while (true) {
         auto frame = transceiver->receive();

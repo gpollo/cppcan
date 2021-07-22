@@ -11,12 +11,9 @@
 
 namespace can::driver {
 
-class candlelight;
-using candlelight_ptr = std::shared_ptr<candlelight>;
-
 class candlelight : public transceiver {
    public:
-    static candlelight_ptr create(uint8_t device);
+    static ptr create(uint8_t device);
     ~candlelight() override;
 
     bool set_bitrate(unsigned long bitrate) override;

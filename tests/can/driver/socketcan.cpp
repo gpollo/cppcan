@@ -15,10 +15,14 @@ static void print_message(can::frame::ptr msg) {
 }
 
 static void test_interface(const std::string& device) {
-    auto transceiver1 = can::driver::socketcan::create(device);
+    auto result1 = can::driver::socketcan::create(device);
+    assert(result1 != nullptr);
+    auto transceiver1 = result1.get_unique_transceiver();
     assert(transceiver1 != nullptr);
 
-    auto transceiver2 = can::driver::socketcan::create(device);
+    auto result2 = can::driver::socketcan::create(device);
+    assert(result2 != nullptr);
+    auto transceiver2 = result2.get_unique_transceiver();
     assert(transceiver2 != nullptr);
 
     for (int i = 0; i < 100; i++) {

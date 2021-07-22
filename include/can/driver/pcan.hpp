@@ -11,9 +11,6 @@
 
 namespace can::driver {
 
-class pcan;
-using pcan_ptr = std::shared_ptr<pcan>;
-
 class pcan : public transceiver {
    public:
 #ifdef BUILD_LINUX
@@ -24,7 +21,7 @@ class pcan : public transceiver {
     using event_type = void*;
 #endif /* BUILD_WINDOWS */
 
-    static pcan_ptr create(const std::string& interface);
+    static ptr create(const std::string& interface);
     ~pcan() override;
 
     bool set_bitrate(unsigned long bitrate) override;

@@ -39,7 +39,7 @@ interface_list_ptr socketcan::list_interfaces() {
     return interfaces;
 }
 
-socketcan_ptr socketcan::create(const std::string& interface) {
+socketcan::ptr socketcan::create(const std::string& interface) {
     ifreq ifr{};
     sockaddr_can addr{};
 
@@ -66,7 +66,7 @@ socketcan_ptr socketcan::create(const std::string& interface) {
         goto bind_failed;
     }
 
-    return socketcan_ptr(new socketcan(sock, interface));
+    return ptr(std::shared_ptr<socketcan>(new socketcan(sock, interface)));
 
 bind_failed:
 ioctl_failed:

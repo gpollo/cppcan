@@ -48,7 +48,7 @@ static std::string get_error(candle_handle handle) {
     return ERROR_TO_STRING.at(candle_dev_last_error(handle));
 }
 
-candlelight_ptr candlelight::create(uint8_t device) {
+candlelight::ptr candlelight::create(uint8_t device) {
     candle_list_handle handle_list = nullptr;
     candle_handle handle           = nullptr;
     candle_devstate_t state        = CANDLE_DEVSTATE_INUSE;
@@ -80,7 +80,7 @@ candlelight_ptr candlelight::create(uint8_t device) {
 
     candle_list_free(handle_list);
 
-    return candlelight_ptr(new candlelight(handle));
+    return ptr(std::shared_ptr<candlelight>(new candlelight(handle)));
 
 candle_dev_open_failed:
 device_in_use:

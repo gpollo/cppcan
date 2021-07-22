@@ -58,7 +58,7 @@ static std::string get_error(TPCANStatus status) {
     return std::string(pcan_error_buffer.data());
 }
 
-pcan_ptr pcan::create(const std::string& interface) {
+pcan::ptr pcan::create(const std::string& interface) {
 #ifdef BUILD_LINUX
     pcan::event_type event = 0;
 #endif /* BUILD_LINUX */
@@ -88,7 +88,7 @@ pcan_ptr pcan::create(const std::string& interface) {
         goto get_value_failed;
     }
 
-    return pcan_ptr(new pcan(device, event));
+    return ptr(std::shared_ptr<pcan>(new pcan(device, event)));
 
 get_value_failed:
     status = CAN_Uninitialize(device);
