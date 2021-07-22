@@ -11,3 +11,15 @@ test('can/utils/crop_cast',
         cpp_args: cpp_flags,
     )
 )
+
+#####################################
+# can::utils::unique_owner_ptr test #
+#####################################
+
+test('can/utils/unique_owner_ptr',
+    executable('test_unique_owner_ptr', ['unique_owner_ptr.cpp'],
+        include_directories: can_includes,
+        dependencies: can_deps,
+        cpp_args: cpp_flags,
+    )
+)
