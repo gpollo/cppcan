@@ -12,9 +12,9 @@ class message : public can::database::message, public object {
 
     static ptr from_ast(const ast::database& database, const ast::message& message);
 
-    message(const ast::message& message, std::map<std::string, signal::ptr> signals,
-            std::map<std::string, int64_t> integer_attributes, std::map<std::string, float> float_attributes,
-            std::map<std::string, std::string> string_attributes);
+    message(const ast::message& message, std::map<std::string, signal::ptr> signals_by_names,
+            std::map<quark, signal::ptr> signals_by_quarks, std::map<std::string, int64_t> integer_attributes,
+            std::map<std::string, float> float_attributes, std::map<std::string, std::string> string_attributes);
 
     /* inherited methods from can::database::message */
 
@@ -24,6 +24,7 @@ class message : public can::database::message, public object {
     [[nodiscard]] const std::string& get_node() const override;
     [[nodiscard]] std::vector<can::database::signal::const_ptr> get_signals() const override;
     [[nodiscard]] can::database::signal::const_ptr get_signal(const std::string& name) const override;
+    [[nodiscard]] can::database::signal::const_ptr get_signal(quark quark) const override;
 
     /* inherited methods from can::format::dbc::object */
 
@@ -35,6 +36,7 @@ class message : public can::database::message, public object {
 
     [[nodiscard]] std::vector<dbc::signal::const_ptr> get_signals_dbc() const;
     [[nodiscard]] dbc::signal::const_ptr get_signal_dbc(const std::string& name) const;
+    [[nodiscard]] dbc::signal::const_ptr get_signal_dbc(quark quark) const;
     /* TODO: add description fields */
 
    private:
@@ -42,7 +44,8 @@ class message : public can::database::message, public object {
     unsigned int identifier_;
     unsigned short byte_count_;
     std::string node_;
-    std::map<std::string, signal::ptr> signals_{};
+    std::map<std::string, signal::ptr> signals_by_names_{};
+    std::map<quark, signal::ptr> signals_by_quarks_{};
 };
 
 inline const std::string& message::get_name() const {

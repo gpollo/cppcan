@@ -6,6 +6,7 @@
 #include <variant>
 #include <vector>
 
+#include "can/types.hpp"
 #include "can/utils/quark.hpp"
 
 namespace can {
@@ -208,6 +209,11 @@ class database {
          * This method returns the signal in the message, if present, with the specified name.
          */
         [[nodiscard]] virtual signal::const_ptr get_signal(const std::string& name) const = 0;
+
+        /**
+         * This method returns the signal in the message, if present, with the specified quark.
+         */
+        [[nodiscard]] virtual signal::const_ptr get_signal(quark quark) const = 0;
 
         /**
          * This method decodes signals from the given frame using the messages definition.
