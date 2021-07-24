@@ -1,4 +1,5 @@
 #include "can/database.hpp"
+#include <math.h>
 #include "can/format/dbc/database.hpp"
 #include "can/log.hpp"
 
@@ -53,8 +54,14 @@ uint64_t database::signal::extract_raw_value(uint8_t* bytes, size_t length) cons
     const auto start_bit = get_start_bit();
     const auto end_bit   = start_bit + bit_count;
 
-    const auto byte_start = start_bit / 8;
-    const auto byte_end   = end_bit / 8;
+    const auto byte_start = start_bit / 8U;
+    const auto byte_end   = end_bit / 8U;
+
+    if (byte_end >= length) {
+        logger->error("frame of {} byte{} is too small to decode signal '{}'", length, (length > 1) ? "s" : "",
+                      get_name());
+        return 0;
+    }
 
     /* TODO: add support for big-endian packed message */
 
@@ -90,6 +97,11 @@ quark database::message::get_quark() const {
 
 std::vector<std::pair<database::signal::const_ptr, float>> database::message::decode(uint8_t* bytes,
                                                                                      size_t length) const {
+    if (get_byte_count() < length) {
+        logger->warn("frame of {} byte{} is too small to decode message '{}'", length, (length > 1) ? "s" : "",
+                     get_name());
+    }
+
     auto signals = get_signals();
 
     signal::const_ptr multiplexer = nullptr;
