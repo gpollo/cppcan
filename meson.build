@@ -59,6 +59,7 @@ can_sources = [
     'source/can/format/dbc/object.cpp',
     'source/can/format/dbc/signal.cpp',
     'source/can/frame.cpp',
+    'source/can/listener.cpp',
     'source/can/log.cpp',
     'source/can/transceiver.cpp',
     'source/can/utils/quark.cpp',
