@@ -6,8 +6,8 @@ subdir('grammar')
 
 test('can/utils/crop_cast',
     executable('test_crop_cast', ['crop_cast.cpp'],
-        include_directories: can_includes,
-        dependencies: can_deps,
+        include_directories: libcan_includes,
+        dependencies: libcan_deps,
         cpp_args: cpp_flags,
     )
 )
@@ -18,8 +18,8 @@ test('can/utils/crop_cast',
 
 test('can/utils/unique_owner_ptr',
     executable('test_unique_owner_ptr', ['unique_owner_ptr.cpp'],
-        include_directories: can_includes,
-        dependencies: can_deps,
+        include_directories: libcan_includes,
+        dependencies: libcan_deps,
         cpp_args: cpp_flags,
     )
 )

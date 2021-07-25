@@ -4,8 +4,8 @@
 
 test('can/utils/grammar/c_identifier',
     executable('test_c_identifier', ['c_identifier.cpp'],
-        include_directories: can_includes,
-        dependencies: can_deps,
+        include_directories: libcan_includes,
+        dependencies: libcan_deps,
         cpp_args: cpp_flags,
     )
 )
@@ -16,8 +16,8 @@ test('can/utils/grammar/c_identifier',
 
 test('can/utils/grammar/float_or_integral',
     executable('test_float_or_integral', ['float_or_integral.cpp'],
-        include_directories: can_includes,
-        dependencies: can_deps,
+        include_directories: libcan_includes,
+        dependencies: libcan_deps,
         cpp_args: cpp_flags,
     )
 )
@@ -28,8 +28,8 @@ test('can/utils/grammar/float_or_integral',
 
 test('can/utils/grammar/floating_point',
     executable('test_floating_point', ['floating_point.cpp'],
-        include_directories: can_includes,
-        dependencies: can_deps,
+        include_directories: libcan_includes,
+        dependencies: libcan_deps,
         cpp_args: cpp_flags,
     )
 )

@@ -39,11 +39,11 @@ spdlog_subproject = subproject('spdlog')
 # static library #
 ##################
 
-can_includes = [
+libcan_includes = [
     include_directories('include'),
 ]
 
-can_sources = [
+libcan_sources = [
     (enable_driver_socketcan)   ? 'source/can/driver/socketcan.cpp'   : [],
     (enable_driver_pcan)        ? 'source/can/driver/pcan.cpp'        : [],
     (enable_driver_candlelight) ? 'source/can/driver/candlelight.cpp' : [],
@@ -65,7 +65,7 @@ can_sources = [
     'source/can/utils/quark.cpp',
 ]
 
-can_deps = [
+libcan_deps = [
     (enable_driver_socketcan)   ? libsocketcan_subproject.get_variable('libsocketcan_dep') : [],
     (enable_driver_pcan)        ? libpcanbasic_subproject.get_variable('libpcanbasic_dep') : [],
     (enable_driver_candlelight) ? libcandleapi_subproject.get_variable('libcandleapi_dep') : [],
@@ -73,15 +73,15 @@ can_deps = [
     spdlog_subproject.get_variable('spdlog_dep'),
 ]
 
-can_static = static_library('can', can_sources,
-    include_directories: can_includes,
-    dependencies: can_deps,
+libcan_static = static_library('can', libcan_sources,
+    include_directories: libcan_includes,
+    dependencies: libcan_deps,
     cpp_args: cpp_flags,
 )
 
-can_dep = declare_dependency(
-    include_directories: can_includes,
-    link_with: can_static,
+libcan_dep = declare_dependency(
+    include_directories: libcan_includes,
+    link_with: libcan_static,
 )
 
 subdir('tests')
@@ -105,7 +105,7 @@ candump_deps = [
 candump = executable('candump', candump_sources,
     include_directories: candump_includes,
     dependencies: candump_deps,
-    link_with: can_static,
+    link_with: libcan_static,
     cpp_args: cpp_flags,
 )
 
