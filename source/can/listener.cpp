@@ -187,8 +187,10 @@ void listener::producer_thread_function(listener_thread* thread, utils::unique_o
     logger->info("producer thread started");
 
     while (thread->running_) {
-        auto frame = transceiver->receive();
-        frames_.push(std::move(frame));
+        auto frame = transceiver->receive(1000);
+        if (frame != nullptr) {
+            frames_.push(std::move(frame));
+        }
     }
 
     logger->info("producer thread finished");
@@ -198,10 +200,13 @@ void listener::consumer_thread_function(listener_thread* thread) {
     logger->info("consumer thread started {}");
 
     while (thread->running_) {
-        auto frame = frames_.pop();
-        handle_raw_subscribers(frame);
-        handle_message_subscribers(frame);
-        handle_signal_subscribers(frame);
+        auto frame_opt = frames_.pop(1000);
+        if (frame_opt.has_value()) {
+            auto frame = std::move(frame_opt.value());
+            handle_raw_subscribers(frame);
+            handle_message_subscribers(frame);
+            handle_signal_subscribers(frame);
+        }
     }
 
     logger->info("consumer thread finished");

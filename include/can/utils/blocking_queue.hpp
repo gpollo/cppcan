@@ -1,6 +1,7 @@
 #ifndef INCLUDE_CAN_UTILS_BLOCKING_QUEUE_HPP
 #define INCLUDE_CAN_UTILS_BLOCKING_QUEUE_HPP
 
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -34,6 +35,18 @@ class blocking_queue {
         T value = std::move(queue_.front());
         queue_.pop();
         return value;
+    }
+
+    std::optional<T> pop(unsigned int timeout_ms) {
+        auto duration = std::chrono::milliseconds(timeout_ms);
+        std::unique_lock<std::mutex> lock(mutex_);
+        if (condition_.wait_for(lock, duration, [&]() { return !queue_.empty(); })) {
+            T value = std::move(queue_.front());
+            queue_.pop();
+            return value;
+        }
+
+        return {};
     }
 
    private:
