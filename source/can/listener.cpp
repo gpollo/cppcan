@@ -147,9 +147,13 @@ void listener::shutdown() {
     consumer_thread_.running_ = false;
 
     for (auto& [quark, producer_thread] : producer_threads_) {
-        producer_thread.thread_.join();
+        if (producer_thread.thread_.joinable()) {
+            producer_thread.thread_.join();
+        }
     }
-    consumer_thread_.thread_.join();
+    if (consumer_thread_.thread_.joinable()) {
+        consumer_thread_.thread_.join();
+    }
 
     producer_threads_.clear();
 }
@@ -157,11 +161,11 @@ void listener::shutdown() {
 void listener::shutdown(quark transceiver) {
     std::lock_guard<std::mutex> guard(transceiver_mutex_);
 
-    logger->info("shutting down transceiver [quark={}]", transceiver);
-
     if (!producer_threads_.contains(transceiver)) {
         return;
     }
+
+    logger->info("shutting down transceiver [quark={}]", transceiver);
 
     auto& producer_thread    = producer_threads_.at(transceiver);
     producer_thread.running_ = false;
