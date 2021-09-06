@@ -281,8 +281,9 @@ void listener::handle_signal_subscribers(const frame::ptr& frame) {
             continue;
         }
 
-        auto value = signal->decode(frame->bytes_, frame->length_);
-        subscriber.callback_(signal, value);
+        auto raw_value     = signal->extract(frame->bytes_, frame->length_);
+        auto decoded_value = signal->decode(raw_value);
+        subscriber.callback_(signal, decoded_value);
     }
 }
 

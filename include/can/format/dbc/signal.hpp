@@ -35,7 +35,7 @@ class signal : public can::database::signal, public object {
     [[nodiscard]] const std::string& get_unit() const override;
     [[nodiscard]] const std::vector<std::string>& get_nodes() const override;
     [[nodiscard]] multiplexing get_multiplexing() const override;
-    [[nodiscard]] const std::string& resolve_value(uint64_t raw_value) const override;
+    [[nodiscard]] const std::string& resolve(uint64_t raw_value) const override;
 
     /* inherited methods from can::format::dbc::object */
 
@@ -116,7 +116,7 @@ inline signal::multiplexing signal::get_multiplexing() const {
     return multiplexing_;
 }
 
-inline const std::string& signal::resolve_value(uint64_t raw_value) const {
+inline const std::string& signal::resolve(uint64_t raw_value) const {
     static const std::string EMPTY_STRING;
 
     if (values_.contains(raw_value)) {

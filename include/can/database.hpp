@@ -132,19 +132,19 @@ class database {
         [[nodiscard]] virtual multiplexing get_multiplexing() const = 0;
 
         /**
-         * This method resolves, if possible, a raw value into the readable value.
+         * This method extracts the raw value of this message in the frame.
          */
-        [[nodiscard]] virtual const std::string& resolve_value(uint64_t raw_value) const = 0;
+        [[nodiscard]] uint64_t extract(uint8_t* bytes, size_t length) const;
 
         /**
-         * This method decodes the signal from a frame.
+         * This method decodes the signal value from the raw value.
          */
-        [[nodiscard]] float decode(uint8_t* bytes, size_t length) const;
+        [[nodiscard]] float decode(uint64_t raw_value) const;
 
         /**
-         * This method decodes the signal and tries to resolve its value from a frame.
+         * This method resolves, if possible, the readable value from the raw value.
          */
-        [[nodiscard]] std::variant<float, std::string> decode_and_resolve(uint8_t* bytes, size_t length) const;
+        [[nodiscard]] virtual const std::string& resolve(uint64_t raw_value) const = 0;
 
         /**
          * This method returns whether this signal multiplexes other signals in the message.
@@ -155,11 +155,6 @@ class database {
          * This method returns the multiplexed value of this message if it is multiplexed.
          */
         [[nodiscard]] std::optional<unsigned short> get_multiplexed_value() const;
-
-        /**
-         * This method extracts the raw value of this message in the frame.
-         */
-        [[nodiscard]] uint64_t extract_raw_value(uint8_t* bytes, size_t length) const;
 
        private:
         const quark quark_;
@@ -216,9 +211,20 @@ class database {
         [[nodiscard]] virtual signal::const_ptr get_signal(quark quark) const = 0;
 
         /**
+         * This method extracts signals from the given frame using the messages definition.
+         */
+        [[nodiscard]] std::vector<std::pair<signal::const_ptr, uint64_t>> extract(uint8_t* bytes, size_t length) const;
+
+        /**
          * This method decodes signals from the given frame using the messages definition.
          */
         [[nodiscard]] std::vector<std::pair<signal::const_ptr, float>> decode(uint8_t* bytes, size_t length) const;
+
+        /**
+         * This method resolves signals from the given frame using the messages definition.
+         */
+        [[nodiscard]] std::vector<std::pair<signal::const_ptr, std::variant<float, std::string>>> resolve(
+            uint8_t* bytes, size_t length) const;
 
        private:
         const quark quark_;
@@ -243,11 +249,28 @@ class database {
     [[nodiscard]] virtual message::const_ptr get_message(const std::string& name) const = 0;
 
     /**
+     * This method extracts signals from the given frame if the message definition exists.
+     */
+    [[nodiscard]] std::vector<std::pair<signal::const_ptr, uint64_t>> extract(unsigned int identifier, uint8_t* bytes,
+                                                                              size_t length) const;
+
+    /**
      * This method decodes signals from the given frame if the message definition exists.
      */
     [[nodiscard]] std::vector<std::pair<signal::const_ptr, float>> decode(unsigned int identifier, uint8_t* bytes,
                                                                           size_t length) const;
 };
+
+inline std::vector<std::pair<database::signal::const_ptr, uint64_t>> database::extract(unsigned int identifier,
+                                                                                       uint8_t* bytes,
+                                                                                       size_t length) const {
+    auto message = get_message(identifier);
+    if (message == nullptr) {
+        return {};
+    }
+
+    return message->extract(bytes, length);
+}
 
 inline std::vector<std::pair<database::signal::const_ptr, float>> database::decode(unsigned int identifier,
                                                                                    uint8_t* bytes,

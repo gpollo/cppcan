@@ -13,43 +13,7 @@ quark database::signal::get_quark() const {
     return quark_;
 }
 
-bool database::signal::is_multiplexer() const {
-    auto multiplexing = get_multiplexing();
-
-    auto* boolean = std::get_if<bool>(&multiplexing);
-    if (boolean != nullptr) {
-        return *boolean;
-    }
-
-    return false;
-}
-
-std::optional<unsigned short> database::signal::get_multiplexed_value() const {
-    auto multiplexing = get_multiplexing();
-
-    if (std::holds_alternative<unsigned short>(multiplexing)) {
-        return std::get<unsigned short>(multiplexing);
-    }
-
-    return {};
-}
-
-float database::signal::decode(uint8_t* bytes, size_t length) const {
-    auto raw_value = extract_raw_value(bytes, length);
-    return convert_raw_value(raw_value);
-}
-
-std::variant<float, std::string> database::signal::decode_and_resolve(uint8_t* bytes, size_t length) const {
-    auto raw_value = extract_raw_value(bytes, length);
-    auto resolved  = resolve_value(raw_value);
-    if (!resolved.empty()) {
-        return resolved;
-    }
-
-    return convert_raw_value(raw_value);
-}
-
-uint64_t database::signal::extract_raw_value(uint8_t* bytes, size_t length) const {
+uint64_t database::signal::extract(uint8_t* bytes, size_t length) const {
     const auto bit_count = get_bit_count();
     const auto start_bit = get_start_bit();
     const auto end_bit   = start_bit + bit_count;
@@ -80,11 +44,32 @@ uint64_t database::signal::extract_raw_value(uint8_t* bytes, size_t length) cons
     return value & ((1 << bit_count) - 1);
 }
 
-float database::signal::convert_raw_value(unsigned long raw_value) const {
+float database::signal::decode(uint64_t raw_value) const {
     const auto scale  = get_scale();
     const auto offset = get_offset();
 
     return (static_cast<float>(raw_value) * scale) + offset;
+}
+
+bool database::signal::is_multiplexer() const {
+    auto multiplexing = get_multiplexing();
+
+    auto* boolean = std::get_if<bool>(&multiplexing);
+    if (boolean != nullptr) {
+        return *boolean;
+    }
+
+    return false;
+}
+
+std::optional<unsigned short> database::signal::get_multiplexed_value() const {
+    auto multiplexing = get_multiplexing();
+
+    if (std::holds_alternative<unsigned short>(multiplexing)) {
+        return std::get<unsigned short>(multiplexing);
+    }
+
+    return {};
 }
 
 /* can::database::message class */
@@ -95,11 +80,12 @@ quark database::message::get_quark() const {
     return quark_;
 }
 
-std::vector<std::pair<database::signal::const_ptr, float>> database::message::decode(uint8_t* bytes,
-                                                                                     size_t length) const {
+std::vector<std::pair<database::signal::const_ptr, uint64_t>> database::message::extract(uint8_t* bytes,
+                                                                                         size_t length) const {
     if (get_byte_count() < length) {
         logger->warn("frame of {} byte{} is too small to decode message '{}'", length, (length > 1) ? "s" : "",
                      get_name());
+        return {};
     }
 
     auto signals = get_signals();
@@ -118,12 +104,14 @@ std::vector<std::pair<database::signal::const_ptr, float>> database::message::de
         multiplexer = signal;
     }
 
+    std::vector<std::pair<signal::const_ptr, uint64_t>> raw_values;
+
     std::optional<uint64_t> multiplexing_value;
     if (multiplexer != nullptr) {
-        multiplexing_value = multiplexer->extract_raw_value(bytes, length);
+        multiplexing_value = multiplexer->extract(bytes, length);
+        raw_values.emplace_back(multiplexer, multiplexing_value.value());
     }
 
-    std::vector<std::pair<signal::const_ptr, float>> values;
     for (auto signal : signals) {
         if (signal == multiplexer) {
             continue;
@@ -136,10 +124,39 @@ std::vector<std::pair<database::signal::const_ptr, float>> database::message::de
             }
         }
 
-        values.emplace_back(signal, signal->decode(bytes, length));
+        raw_values.emplace_back(signal, signal->extract(bytes, length));
     }
 
-    return values;
+    return raw_values;
+}
+
+std::vector<std::pair<database::signal::const_ptr, float>> database::message::decode(uint8_t* bytes,
+                                                                                     size_t length) const {
+    std::vector<std::pair<signal::const_ptr, float>> decoded_values;
+
+    auto raw_values = extract(bytes, length);
+    for (auto [signal, raw_value] : raw_values) {
+        decoded_values.emplace_back(signal, signal->decode(raw_value));
+    }
+
+    return decoded_values;
+}
+
+std::vector<std::pair<database::signal::const_ptr, std::variant<float, std::string>>> database::message::resolve(
+    uint8_t* bytes, size_t length) const {
+    std::vector<std::pair<signal::const_ptr, std::variant<float, std::string>>> resolved_values;
+
+    auto raw_values = extract(bytes, length);
+    for (auto [signal, raw_value] : raw_values) {
+        auto resolved_value = signal->resolve(raw_value);
+        if (!resolved_value.empty()) {
+            resolved_values.emplace_back(signal, resolved_value);
+        } else {
+            resolved_values.emplace_back(signal, signal->decode(raw_value));
+        }
+    }
+
+    return resolved_values;
 }
 
 /* can::database class */
