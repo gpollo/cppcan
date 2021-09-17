@@ -17,13 +17,6 @@
 #include "can/log.hpp"
 #include "can/utils/crop_cast.hpp"
 
-extern "C" {
-
-/* internal function to libpcanbasic */
-TPCANStatus pcanbasic_get_error_text(TPCANStatus error, WORD language, LPSTR buffer);
-
-} /* extern "C" */
-
 namespace can::driver {
 
 const static std::map<std::string, unsigned int> INTERFACE_TO_DEVICE = {
@@ -54,7 +47,7 @@ static constexpr unsigned int MAX_DLC  = 8;
 
 static std::string get_error(TPCANStatus status) {
     std::array<char, 256> pcan_error_buffer{};
-    pcanbasic_get_error_text(status, 9, pcan_error_buffer.data());
+    CAN_GetErrorText(status, 0, pcan_error_buffer.data());
     return std::string(pcan_error_buffer.data());
 }
 
