@@ -6,11 +6,11 @@
 #endif /* ENABLE_DRIVER_CANDLELIGHT */
 
 #ifdef ENABLE_DRIVER_PCAN
-#include "can/driver/socketcan.hpp"
+#include "can/driver/pcan.hpp"
 #endif /* ENABLE_DRIVER_PCAN */
 
 #ifdef ENABLE_DRIVER_SOCKETCAN
-#include "can/driver/pcan.hpp"
+#include "can/driver/socketcan.hpp"
 #endif /* ENABLE_DRIVER_SOCKETCAN */
 
 namespace can {
