@@ -5,6 +5,7 @@ project('can', ['cpp'],
     version: 'latest',
 )
 
+cpp = meson.get_compiler('cpp')
 cpp_flags = ['-Wno-unused-local-typedefs', '-Wno-parentheses']
 
 #########################
@@ -18,6 +19,8 @@ if host_machine.system() == 'linux'
     enable_driver_candlelight = false
     libpcanbasic_subproject   = subproject('libpcanbasic-linux')
     libsocketcan_subproject   = subproject('libsocketcan')
+    winusb_dep                = []
+    setupapi_dep              = []
 elif host_machine.system() == 'windows'
     cpp_flags += '-DBUILD_WINDOWS'
     enable_driver_socketcan   = false
@@ -25,6 +28,8 @@ elif host_machine.system() == 'windows'
     enable_driver_candlelight = true
     libpcanbasic_subproject   = subproject('libpcanbasic-windows')
     libcandleapi_subproject   = subproject('libcandleapi')
+    winusb_dep                = cpp.find_library('winusb', required: true)
+    setupapi_dep              = cpp.find_library('setupapi', required: true)
 endif
 
 cpp_flags += (enable_driver_socketcan)   ? '-DENABLE_DRIVER_SOCKETCAN'  : []
@@ -71,9 +76,11 @@ libcan_deps = [
     (enable_driver_candlelight) ? libcandleapi_subproject.get_variable('libcandleapi_dep') : [],
     lexy_subproject.get_variable('lexy_dep'),
     spdlog_subproject.get_variable('spdlog_dep'),
+    setupapi_dep,
+    winusb_dep,
 ]
 
-libcan_static = static_library('can', libcan_sources,
+libcan_static = library('can', libcan_sources,
     include_directories: libcan_includes,
     dependencies: libcan_deps,
     cpp_args: cpp_flags,
@@ -100,12 +107,12 @@ candump_sources = [
 
 candump_deps = [
     fmt_subproject.get_variable('fmt_dep'),
+    libcan_dep,
 ]
 
 candump = executable('candump', candump_sources,
     include_directories: candump_includes,
     dependencies: candump_deps,
-    link_with: libcan_static,
     cpp_args: cpp_flags,
 )
 

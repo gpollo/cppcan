@@ -11,6 +11,9 @@ windres     = '/usr/bin/x86_64-w64-mingw32-windres'
 root     = '/usr/x86_64-w64-mingw32'
 sys_root = '/usr/x86_64-w64-mingw32/'
 
+[built-in options]
+cpp_args = ['-fext-numeric-literals']
+
 [host_machine]
 system     = 'windows'
 cpu_family = 'x86_64'
