@@ -3,6 +3,7 @@
 
 #include <list>
 #include <memory>
+#include <string>
 
 #include "can/frame.hpp"
 #include "can/utils/unique_owner_ptr.hpp"

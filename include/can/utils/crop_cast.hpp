@@ -18,7 +18,7 @@ static inline constexpr To crop_cast(From value, std::false_type /* narrow */) {
 
 template <typename From, typename To>
 static inline constexpr To crop_cast(From value, std::true_type /* narrow */) {
-    constexpr To TO_MAX = std::numeric_limits<To>::max();
+    constexpr To TO_MAX = (std::numeric_limits<To>::max)();
 
     if (value > static_cast<From>(TO_MAX)) {
         return TO_MAX;
@@ -42,8 +42,8 @@ static inline constexpr To crop_cast(From value, std::false_type /* narrow */) {
 
 template <typename From, typename To>
 static inline constexpr To crop_cast(From value, std::true_type /* narrow */) {
-    constexpr To TO_MIN = std::numeric_limits<To>::min();
-    constexpr To TO_MAX = std::numeric_limits<To>::max();
+    constexpr To TO_MIN = (std::numeric_limits<To>::min)();
+    constexpr To TO_MAX = (std::numeric_limits<To>::max)();
 
     if (value < static_cast<From>(TO_MIN)) {
         return TO_MIN;
@@ -67,8 +67,8 @@ static inline constexpr To crop_cast(From value, std::false_type /* narrow */) {
 
 template <typename From, typename To>
 static inline constexpr To crop_cast(From value, std::true_type /* narrow */) {
-    constexpr To TO_MIN = std::numeric_limits<To>::min();
-    constexpr To TO_MAX = std::numeric_limits<To>::max();
+    constexpr To TO_MIN = (std::numeric_limits<To>::min)();
+    constexpr To TO_MAX = (std::numeric_limits<To>::max)();
 
     if (value < static_cast<From>(TO_MIN)) {
         return TO_MIN;
@@ -92,7 +92,7 @@ static inline constexpr To crop_cast(From value, std::false_type /* narrow */) {
 
 template <typename From, typename To>
 static inline constexpr To crop_cast(From value, std::true_type /* narrow */) {
-    constexpr To TO_MAX = std::numeric_limits<To>::max();
+    constexpr To TO_MAX = (std::numeric_limits<To>::max)();
 
     if (value > static_cast<From>(TO_MAX)) {
         return TO_MAX;
@@ -143,8 +143,8 @@ namespace detail::float_integral {
 
 template <typename From, typename To>
 static inline constexpr To crop_cast(From value) {
-    constexpr To TO_MIN = std::numeric_limits<To>::min();
-    constexpr To TO_MAX = std::numeric_limits<To>::max();
+    constexpr To TO_MIN = (std::numeric_limits<To>::min)();
+    constexpr To TO_MAX = (std::numeric_limits<To>::max)();
 
     if (value <= static_cast<From>(TO_MIN)) {
         return TO_MIN;

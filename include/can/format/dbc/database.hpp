@@ -8,7 +8,7 @@
 
 namespace can::format::dbc {
 
-class database : public can::database::database, public object {
+class database : public can::database, public object {
    public:
     using ptr = std::shared_ptr<database>;
 

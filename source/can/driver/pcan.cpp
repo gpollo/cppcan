@@ -41,7 +41,7 @@ const static std::map<std::string, unsigned int> INTERFACE_TO_DEVICE = {
     {"PCAN_LANBUS12", PCAN_LANBUS12}, {"PCAN_LANBUS13", PCAN_LANBUS13}, {"PCAN_LANBUS14", PCAN_LANBUS14},
     {"PCAN_LANBUS15", PCAN_LANBUS15}, {"PCAN_LANBUS16", PCAN_LANBUS16}};
 
-static constexpr uint64_t MSEC_TO_USEC = 1e3;
+static constexpr uint64_t MSEC_TO_USEC = 1000;
 static constexpr uint32_t SHIFT32      = 32;
 static constexpr unsigned int MAX_DLC  = 8;
 
@@ -103,7 +103,7 @@ pcan::~pcan() {
 }
 
 bool pcan::set_bitrate(unsigned long bitrate) {
-    constexpr auto MAX_BITRATE = static_cast<unsigned long>(std::numeric_limits<uint32_t>::max());
+    constexpr auto MAX_BITRATE = static_cast<unsigned long>((std::numeric_limits<uint32_t>::max)());
 
     if (bitrate > MAX_BITRATE) {
         logger->error("invalid bitrate specified");
