@@ -16,6 +16,10 @@ cc.check_header('unistd.h',     required: true)
 cc.check_header('utime.h',      required: true)
 cc.check_header('net/if.h',     required: true)
 
+################
+# libsocketcan #
+################
+
 libsocketcan_includes = [
     include_directories('include'),
 ]

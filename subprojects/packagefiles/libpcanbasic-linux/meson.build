@@ -1,5 +1,10 @@
 project('libpcanbasic-linux', ['c'], version: '4.4.2')
+
 cflags = ['-DNO_RT']
+
+################
+# libpcanbasic #
+################
 
 libpcanbasic_root = 'PCAN-Basic_Linux-4.4.2/libpcanbasic/pcanbasic'
 

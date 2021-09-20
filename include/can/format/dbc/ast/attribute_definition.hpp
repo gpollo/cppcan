@@ -96,12 +96,12 @@ inline T attribute_definition::number<T>::parse(const std::string& text) const {
     T value;
 
     if (std::is_floating_point<T>::value) {
-        value = std::stof(text, &next);
+        value = static_cast<T>(std::stof(text, &next));
         if (next == text.size()) {
             throw std::string("failed to parse float attribute");
         }
     } else if (std::is_integral<T>::value) {
-        value = std::stol(text, &next);
+        value =  static_cast<T>(std::stol(text, &next));
         if (next != text.size()) {
             throw std::string("failed to parse integer attribute");
         }

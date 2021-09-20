@@ -1,5 +1,19 @@
 project('libcandleapi', ['c'], version: 'git')
-cflags = ['-Wno-incompatible-pointer-types']
+
+cc = meson.get_compiler('cpp')
+c_args = []
+
+###########################
+# compiler specific flags #
+###########################
+
+if cc.get_id() == 'gcc'
+    c_args = ['-Wno-incompatible-pointer-types']
+endif
+
+################
+# libcandleapi #
+################
 
 libcandleapi_includes = [
     include_directories('.'),
@@ -12,7 +26,7 @@ libcandleapi_sources = [
 
 libcandleapi = static_library('candleapi', libcandleapi_sources,
     include_directories: libcandleapi_includes,
-    c_args: cflags,
+    c_args: c_args,
 )
 
 libcandleapi_dep = declare_dependency(

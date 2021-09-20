@@ -1,5 +1,10 @@
 project('libpcanbasic', 'c', version: 'latest')
+
 cc = meson.get_compiler('c')
+
+################
+# libpcanbasic #
+################
 
 libpcanbasic_root = 'PCAN-Basic API'
 

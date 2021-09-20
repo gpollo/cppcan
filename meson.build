@@ -5,13 +5,13 @@ project('can', ['cpp'],
     version: 'latest',
 )
 
+cpp = meson.get_compiler('cpp')
 cpp_flags = []
 
 ###########################
 # compiler specific flags #
 ###########################
 
-cpp = meson.get_compiler('cpp')
 if cpp.get_id() == 'gcc'
     cpp_flags = ['-Wno-unused-local-typedefs', '-Wno-parentheses']
 endif
@@ -88,7 +88,7 @@ libcan_deps = [
     winusb_dep,
 ]
 
-libcan_static = library('can', libcan_sources,
+libcan_static = static_library('can', libcan_sources,
     include_directories: libcan_includes,
     dependencies: libcan_deps,
     cpp_args: cpp_flags,
@@ -96,7 +96,7 @@ libcan_static = library('can', libcan_sources,
 
 libcan_dep = declare_dependency(
     include_directories: libcan_includes,
-    link_with: libcan_static,
+    link_whole: libcan_static,
 )
 
 subdir('tests')
@@ -114,7 +114,7 @@ candump_sources = [
 ]
 
 candump_deps = [
-    fmt_subproject.get_variable('fmt_dep'),
+    fmt_subproject.get_variable('fmt_dep').partial_dependency(includes: true, links: true),
     libcan_dep,
 ]
 
