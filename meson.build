@@ -5,8 +5,16 @@ project('can', ['cpp'],
     version: 'latest',
 )
 
+cpp_flags = []
+
+###########################
+# compiler specific flags #
+###########################
+
 cpp = meson.get_compiler('cpp')
-cpp_flags = ['-Wno-unused-local-typedefs', '-Wno-parentheses']
+if cpp.get_id() == 'gcc'
+    cpp_flags = ['-Wno-unused-local-typedefs', '-Wno-parentheses']
+endif
 
 #########################
 # drivers configuration #
