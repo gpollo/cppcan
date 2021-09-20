@@ -18,7 +18,7 @@ database::ptr database::from_path(const std::filesystem::path& path) {
         return nullptr;
     }
 
-    auto ast = lexy::parse<grammar::database>(file, lexy_ext::report_error);
+    auto ast = lexy::parse<grammar::database>(file.buffer(), lexy_ext::report_error);
     if (!ast.has_value()) {
         logger->error("failed to parse file '{}'", path.string().c_str());
         return nullptr;
