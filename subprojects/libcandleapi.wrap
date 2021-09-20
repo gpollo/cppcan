@@ -1,7 +1,0 @@
-[wrap-git]
-directory = libcandleapi-git
-lead_directory_missing = true
-patch_directory = libcandleapi
-
-url = https://github.com/HubertD/cangaroo.git
-revision = head
