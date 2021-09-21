@@ -92,6 +92,9 @@ channel_count_failed:
 }
 
 pcan::ptr pcan::create(const std::string& interface) {
+#ifdef BUILD_LINUX
+    pcan::event_type event = 0;
+#endif /* BUILD_LINUX */
 #ifdef BUILD_WINDOWS
     pcan::event_type event = nullptr;
 #endif /* BUILD_WINDOWS */
@@ -111,15 +114,35 @@ pcan::ptr pcan::create(const std::string& interface) {
         goto initialize_failed;
     }
 
+#ifdef BUILD_LINUX
     status = CAN_GetValue(device, PCAN_RECEIVE_EVENT, &event, sizeof(event));
     if (status != PCAN_ERROR_OK) {
         logger->error("could not get event of interface '{}': {}", interface, get_error(status));
-        goto get_value_failed;
+        goto pcan_receive_event_failed;
     }
+#endif /* BUILD_LINUX */
+
+#ifdef BUILD_WINDOWS
+    event = CreateEvent(nullptr, FALSE, FALSE, "");
+    if (event == nullptr) {
+        logger->error("could not create event handler: {}", utils::windows::get_last_error());
+        goto create_event_failed;
+    }
+
+    status = CAN_SetValue(device, PCAN_RECEIVE_EVENT, &event, sizeof(event));
+    if (status != PCAN_ERROR_OK) {
+        logger->error("could not set event of interface '{}': {}", interface, get_error(status));
+        goto pcan_receive_event_failed;
+    }
+#endif /* BUILD_WINDOWS */
 
     return ptr(std::shared_ptr<pcan>(new pcan(device, event)));
 
-get_value_failed:
+pcan_receive_event_failed:
+#ifdef BUILD_WINDOWS
+    CloseHandle(event);
+#endif /* BUILD_WINDOWS */
+create_event_failed:
     status = CAN_Uninitialize(device);
     if (status != PCAN_ERROR_OK) {
         logger->error("could not uninitialize interface '{}': {}", interface, get_error(status));
@@ -136,6 +159,8 @@ pcan::~pcan() {
     if (status != PCAN_ERROR_OK) {
         logger->error("could not uninitialize interface: {}", get_error(status));
     }
+
+    CloseHandle(event_);
 }
 
 bool pcan::set_bitrate(unsigned long bitrate) {
