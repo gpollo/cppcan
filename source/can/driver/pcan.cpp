@@ -20,20 +20,20 @@
 namespace can::driver {
 
 const static std::map<std::string, unsigned int> INTERFACE_TO_DEVICE = {
-    {"PCAN_USBBUS1", PCAN_USBBUS1},   {"PCAN_USBBUS2", PCAN_USBBUS2},
-    {"PCAN_USBBUS3", PCAN_USBBUS3},   {"PCAN_USBBUS4", PCAN_USBBUS4},   {"PCAN_USBBUS5", PCAN_USBBUS5},
-    {"PCAN_USBBUS6", PCAN_USBBUS6},   {"PCAN_USBBUS7", PCAN_USBBUS7},   {"PCAN_USBBUS8", PCAN_USBBUS8},
-    {"PCAN_USBBUS9", PCAN_USBBUS9},   {"PCAN_USBBUS10", PCAN_USBBUS10}, {"PCAN_USBBUS11", PCAN_USBBUS11},
-    {"PCAN_USBBUS12", PCAN_USBBUS12}, {"PCAN_USBBUS13", PCAN_USBBUS13}, {"PCAN_USBBUS14", PCAN_USBBUS14},
-    {"PCAN_USBBUS15", PCAN_USBBUS15}, {"PCAN_USBBUS16", PCAN_USBBUS16}};
+    {"PCAN_USBBUS1", PCAN_USBBUS1},   {"PCAN_USBBUS2", PCAN_USBBUS2},   {"PCAN_USBBUS3", PCAN_USBBUS3},
+    {"PCAN_USBBUS4", PCAN_USBBUS4},   {"PCAN_USBBUS5", PCAN_USBBUS5},   {"PCAN_USBBUS6", PCAN_USBBUS6},
+    {"PCAN_USBBUS7", PCAN_USBBUS7},   {"PCAN_USBBUS8", PCAN_USBBUS8},   {"PCAN_USBBUS9", PCAN_USBBUS9},
+    {"PCAN_USBBUS10", PCAN_USBBUS10}, {"PCAN_USBBUS11", PCAN_USBBUS11}, {"PCAN_USBBUS12", PCAN_USBBUS12},
+    {"PCAN_USBBUS13", PCAN_USBBUS13}, {"PCAN_USBBUS14", PCAN_USBBUS14}, {"PCAN_USBBUS15", PCAN_USBBUS15},
+    {"PCAN_USBBUS16", PCAN_USBBUS16}};
 
 const static std::map<unsigned int, std::string> DEVICE_TO_INTERFACE = {
-    {PCAN_USBBUS1, "PCAN_USBBUS1"},   {PCAN_USBBUS2, "PCAN_USBBUS2"},
-    {PCAN_USBBUS3, "PCAN_USBBUS3"},   {PCAN_USBBUS4, "PCAN_USBBUS4"},   {PCAN_USBBUS5, "PCAN_USBBUS5"},
-    {PCAN_USBBUS6, "PCAN_USBBUS6"},   {PCAN_USBBUS7, "PCAN_USBBUS7"},   {PCAN_USBBUS8, "PCAN_USBBUS8"},
-    {PCAN_USBBUS9, "PCAN_USBBUS9"},   {PCAN_USBBUS10, "PCAN_USBBUS10"}, {PCAN_USBBUS11, "PCAN_USBBUS11"},
-    {PCAN_USBBUS12, "PCAN_USBBUS12"}, {PCAN_USBBUS13, "PCAN_USBBUS13"}, {PCAN_USBBUS14, "PCAN_USBBUS14"},
-    {PCAN_USBBUS15, "PCAN_USBBUS15"}, {PCAN_USBBUS16, "PCAN_USBBUS16"}};
+    {PCAN_USBBUS1, "PCAN_USBBUS1"},   {PCAN_USBBUS2, "PCAN_USBBUS2"},   {PCAN_USBBUS3, "PCAN_USBBUS3"},
+    {PCAN_USBBUS4, "PCAN_USBBUS4"},   {PCAN_USBBUS5, "PCAN_USBBUS5"},   {PCAN_USBBUS6, "PCAN_USBBUS6"},
+    {PCAN_USBBUS7, "PCAN_USBBUS7"},   {PCAN_USBBUS8, "PCAN_USBBUS8"},   {PCAN_USBBUS9, "PCAN_USBBUS9"},
+    {PCAN_USBBUS10, "PCAN_USBBUS10"}, {PCAN_USBBUS11, "PCAN_USBBUS11"}, {PCAN_USBBUS12, "PCAN_USBBUS12"},
+    {PCAN_USBBUS13, "PCAN_USBBUS13"}, {PCAN_USBBUS14, "PCAN_USBBUS14"}, {PCAN_USBBUS15, "PCAN_USBBUS15"},
+    {PCAN_USBBUS16, "PCAN_USBBUS16"}};
 
 static constexpr uint64_t MSEC_TO_USEC = 1000;
 static constexpr uint32_t SHIFT32      = 32;
@@ -46,9 +46,9 @@ static std::string get_error(TPCANStatus status) {
 }
 
 interface_list_ptr pcan::list_interfaces() {
-    TPCANStatus status = 0;
+    TPCANStatus status            = 0;
     TPCANChannelInformation* info = nullptr;
-    auto interfaces = std::make_unique<std::list<std::string>>();
+    auto interfaces               = std::make_unique<std::list<std::string>>();
 
     DWORD channel_count;
     status = CAN_GetValue(PCAN_NONEBUS, PCAN_ATTACHED_CHANNELS_COUNT, (void*)&channel_count, sizeof(channel_count));
@@ -63,13 +63,14 @@ interface_list_ptr pcan::list_interfaces() {
 
     info = new TPCANChannelInformation[channel_count];
 
-    status = CAN_GetValue(PCAN_NONEBUS, PCAN_ATTACHED_CHANNELS, (void*)info, channel_count * sizeof(TPCANChannelInformation));
+    status = CAN_GetValue(PCAN_NONEBUS, PCAN_ATTACHED_CHANNELS, (void*)info,
+                          channel_count * sizeof(TPCANChannelInformation));
     if (status != PCAN_ERROR_OK) {
         logger->error("could not get attached channels: {}", get_error(status));
         goto attached_channels_failed;
     }
 
-    for (int i = 0; i < (int) channel_count; i++) {
+    for (int i = 0; i < (int)channel_count; i++) {
         if (!(info[i].channel_condition & PCAN_CHANNEL_AVAILABLE)) {
             continue;
         }
@@ -78,7 +79,7 @@ interface_list_ptr pcan::list_interfaces() {
             logger->warn("unknown channel handle {}", info[i].channel_handle);
             continue;
         }
- 
+
         interfaces->push_back(DEVICE_TO_INTERFACE.at(info[i].channel_handle));
     }
 
@@ -224,7 +225,7 @@ frame::ptr pcan::try_receive() {
 frame::ptr pcan::receive(long timeout_ms) {
     auto frame = try_receive();
     if (frame != nullptr) {
-        return std::move(frame);
+        return frame;
     }
 
     ResetEvent(event_);
