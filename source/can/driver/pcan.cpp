@@ -7,7 +7,7 @@
 #endif /* BUILD_LINUX */
 
 #ifdef BUILD_WINDOWS
-#include <windows.h>
+#include <can/utils/windows.hpp>
 #undef interface
 #endif /* BUILD_WINDOWS */
 
@@ -166,7 +166,7 @@ frame::ptr pcan::receive(long timeout_ms) {
 
 #ifdef BUILD_WINDOWS
     if (WaitForSingleObject(event_, utils::crop_cast<long, DWORD>(timeout_ms)) == WAIT_FAILED) {
-        logger->error("failed to wait for event");
+        logger->error("failed to wait for event: {}", utils::windows::get_last_error());
         return nullptr;
     }
 #endif /* BUILD_WINDOWS */
