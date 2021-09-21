@@ -203,7 +203,32 @@ bool pcan::transmit(frame::ptr msg) {
     return true;
 }
 
+frame::ptr pcan::try_receive() {
+    TPCANMsg frame;
+    TPCANTimestamp ts;
+    TPCANStatus status = CAN_Read(device_, &frame, &ts);
+    if (status != PCAN_ERROR_OK) {
+        if (status != PCAN_ERROR_QRCVEMPTY) {
+            logger->error("could not read message: {}", get_error(status));
+        }
+
+        return nullptr;
+    }
+
+    uint64_t timestamp = (static_cast<uint64_t>(ts.millis_overflow) << SHIFT32) + ts.millis;
+    timestamp          = timestamp * MSEC_TO_USEC + ts.micros;
+
+    return frame::create(frame.ID, frame.LEN, frame.DATA, timestamp);
+}
+
 frame::ptr pcan::receive(long timeout_ms) {
+    auto frame = try_receive();
+    if (frame != nullptr) {
+        return std::move(frame);
+    }
+
+    ResetEvent(event_);
+
 #ifdef BUILD_LINUX
     int count = -1;
     while (count <= 0) {
@@ -226,27 +251,14 @@ frame::ptr pcan::receive(long timeout_ms) {
 #endif /* BUILD_LINUX */
 
 #ifdef BUILD_WINDOWS
-    if (WaitForSingleObject(event_, utils::crop_cast<long, DWORD>(timeout_ms)) == WAIT_FAILED) {
+    auto timeout = (timeout_ms < 0) ? INFINITE : utils::crop_cast<long, DWORD>(timeout_ms);
+    if (WaitForSingleObject(event_, timeout) == WAIT_FAILED) {
         logger->error("failed to wait for event: {}", utils::windows::get_last_error());
         return nullptr;
     }
 #endif /* BUILD_WINDOWS */
 
-    TPCANMsg frame;
-    TPCANTimestamp ts;
-    TPCANStatus status = CAN_Read(device_, &frame, &ts);
-    if (status != PCAN_ERROR_OK) {
-        if (status != PCAN_ERROR_QRCVEMPTY) {
-            logger->error("could not read message: {}", get_error(status));
-        }
-
-        return nullptr;
-    }
-
-    uint64_t timestamp = (static_cast<uint64_t>(ts.millis_overflow) << SHIFT32) + ts.millis;
-    timestamp          = timestamp * MSEC_TO_USEC + ts.micros;
-
-    return frame::create(frame.ID, frame.LEN, frame.DATA, timestamp);
+    return try_receive();
 }
 
 } /* namespace can::driver */

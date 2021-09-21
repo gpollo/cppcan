@@ -34,6 +34,8 @@ class pcan : public transceiver {
     const event_type event_;
 
     pcan(unsigned int device, event_type event);
+
+    frame::ptr try_receive();
 };
 
 } /* namespace can::driver */
