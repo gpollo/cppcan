@@ -13,6 +13,7 @@ namespace can::driver {
 
 class candlelight : public transceiver {
    public:
+    static interface_list_ptr list_interfaces();
     static ptr create(uint8_t device);
     ~candlelight() override;
 

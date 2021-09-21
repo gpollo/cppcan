@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <map>
+#include <memory>
 
 #include "candle.h"
 
@@ -46,6 +47,35 @@ static constexpr unsigned int MAX_DLC = 8;
 
 static std::string get_error(candle_handle handle) {
     return ERROR_TO_STRING.at(candle_dev_last_error(handle));
+}
+
+interface_list_ptr candlelight::list_interfaces() {
+    auto interfaces = std::make_unique<std::list<std::string>>();
+
+    candle_list_handle list = nullptr;
+    if (!candle_list_scan(&list)) {
+        logger->error("could not list candle devices: UNKNOWN_ERROR");
+        goto candle_list_scan_failed;
+    }
+
+    uint8_t device_count;
+    if (!candle_list_length(list, &device_count)) {
+        logger->error("could get list length: UNKNOWN_ERROR");
+        goto candle_list_length_failed;
+    }
+
+    for (uint8_t i = 0; i < device_count; i++) {
+        interfaces->push_back("DEV" + std::to_string(i));
+    }
+
+    candle_list_free(list);
+
+    return interfaces;
+
+candle_list_length_failed:
+    candle_list_free(list);
+candle_list_scan_failed:
+    return nullptr;
 }
 
 candlelight::ptr candlelight::create(uint8_t device) {
