@@ -21,6 +21,7 @@ class pcan : public transceiver {
     using event_type = void*;
 #endif /* BUILD_WINDOWS */
 
+    static interface_list_ptr list_interfaces();
     static ptr create(const std::string& interface);
     ~pcan() override;
 

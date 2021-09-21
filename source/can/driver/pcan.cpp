@@ -20,26 +20,20 @@
 namespace can::driver {
 
 const static std::map<std::string, unsigned int> INTERFACE_TO_DEVICE = {
-    {"PCAN_ISABUS1", PCAN_ISABUS1},   {"PCAN_ISABUS2", PCAN_ISABUS2},   {"PCAN_ISABUS3", PCAN_ISABUS3},
-    {"PCAN_ISABUS4", PCAN_ISABUS4},   {"PCAN_ISABUS5", PCAN_ISABUS5},   {"PCAN_ISABUS6", PCAN_ISABUS6},
-    {"PCAN_ISABUS7", PCAN_ISABUS7},   {"PCAN_ISABUS8", PCAN_ISABUS8},   {"PCAN_DNGBUS1", PCAN_DNGBUS1},
-    {"PCAN_PCIBUS1", PCAN_PCIBUS1},   {"PCAN_PCIBUS2", PCAN_PCIBUS2},   {"PCAN_PCIBUS3", PCAN_PCIBUS3},
-    {"PCAN_PCIBUS4", PCAN_PCIBUS4},   {"PCAN_PCIBUS5", PCAN_PCIBUS5},   {"PCAN_PCIBUS6", PCAN_PCIBUS6},
-    {"PCAN_PCIBUS7", PCAN_PCIBUS7},   {"PCAN_PCIBUS8", PCAN_PCIBUS8},   {"PCAN_PCIBUS9", PCAN_PCIBUS9},
-    {"PCAN_PCIBUS10", PCAN_PCIBUS10}, {"PCAN_PCIBUS11", PCAN_PCIBUS11}, {"PCAN_PCIBUS12", PCAN_PCIBUS12},
-    {"PCAN_PCIBUS13", PCAN_PCIBUS13}, {"PCAN_PCIBUS14", PCAN_PCIBUS14}, {"PCAN_PCIBUS15", PCAN_PCIBUS15},
-    {"PCAN_PCIBUS16", PCAN_PCIBUS16}, {"PCAN_USBBUS1", PCAN_USBBUS1},   {"PCAN_USBBUS2", PCAN_USBBUS2},
+    {"PCAN_USBBUS1", PCAN_USBBUS1},   {"PCAN_USBBUS2", PCAN_USBBUS2},
     {"PCAN_USBBUS3", PCAN_USBBUS3},   {"PCAN_USBBUS4", PCAN_USBBUS4},   {"PCAN_USBBUS5", PCAN_USBBUS5},
     {"PCAN_USBBUS6", PCAN_USBBUS6},   {"PCAN_USBBUS7", PCAN_USBBUS7},   {"PCAN_USBBUS8", PCAN_USBBUS8},
     {"PCAN_USBBUS9", PCAN_USBBUS9},   {"PCAN_USBBUS10", PCAN_USBBUS10}, {"PCAN_USBBUS11", PCAN_USBBUS11},
     {"PCAN_USBBUS12", PCAN_USBBUS12}, {"PCAN_USBBUS13", PCAN_USBBUS13}, {"PCAN_USBBUS14", PCAN_USBBUS14},
-    {"PCAN_USBBUS15", PCAN_USBBUS15}, {"PCAN_USBBUS16", PCAN_USBBUS16}, {"PCAN_PCCBUS1", PCAN_PCCBUS1},
-    {"PCAN_PCCBUS2", PCAN_PCCBUS2},   {"PCAN_LANBUS1", PCAN_LANBUS1},   {"PCAN_LANBUS2", PCAN_LANBUS2},
-    {"PCAN_LANBUS3", PCAN_LANBUS3},   {"PCAN_LANBUS4", PCAN_LANBUS4},   {"PCAN_LANBUS5", PCAN_LANBUS5},
-    {"PCAN_LANBUS6", PCAN_LANBUS6},   {"PCAN_LANBUS7", PCAN_LANBUS7},   {"PCAN_LANBUS8", PCAN_LANBUS8},
-    {"PCAN_LANBUS9", PCAN_LANBUS9},   {"PCAN_LANBUS10", PCAN_LANBUS10}, {"PCAN_LANBUS11", PCAN_LANBUS11},
-    {"PCAN_LANBUS12", PCAN_LANBUS12}, {"PCAN_LANBUS13", PCAN_LANBUS13}, {"PCAN_LANBUS14", PCAN_LANBUS14},
-    {"PCAN_LANBUS15", PCAN_LANBUS15}, {"PCAN_LANBUS16", PCAN_LANBUS16}};
+    {"PCAN_USBBUS15", PCAN_USBBUS15}, {"PCAN_USBBUS16", PCAN_USBBUS16}};
+
+const static std::map<unsigned int, std::string> DEVICE_TO_INTERFACE = {
+    {PCAN_USBBUS1, "PCAN_USBBUS1"},   {PCAN_USBBUS2, "PCAN_USBBUS2"},
+    {PCAN_USBBUS3, "PCAN_USBBUS3"},   {PCAN_USBBUS4, "PCAN_USBBUS4"},   {PCAN_USBBUS5, "PCAN_USBBUS5"},
+    {PCAN_USBBUS6, "PCAN_USBBUS6"},   {PCAN_USBBUS7, "PCAN_USBBUS7"},   {PCAN_USBBUS8, "PCAN_USBBUS8"},
+    {PCAN_USBBUS9, "PCAN_USBBUS9"},   {PCAN_USBBUS10, "PCAN_USBBUS10"}, {PCAN_USBBUS11, "PCAN_USBBUS11"},
+    {PCAN_USBBUS12, "PCAN_USBBUS12"}, {PCAN_USBBUS13, "PCAN_USBBUS13"}, {PCAN_USBBUS14, "PCAN_USBBUS14"},
+    {PCAN_USBBUS15, "PCAN_USBBUS15"}, {PCAN_USBBUS16, "PCAN_USBBUS16"}};
 
 static constexpr uint64_t MSEC_TO_USEC = 1000;
 static constexpr uint32_t SHIFT32      = 32;
@@ -51,11 +45,53 @@ static std::string get_error(TPCANStatus status) {
     return std::string(pcan_error_buffer.data());
 }
 
-pcan::ptr pcan::create(const std::string& interface) {
-#ifdef BUILD_LINUX
-    pcan::event_type event = 0;
-#endif /* BUILD_LINUX */
+interface_list_ptr pcan::list_interfaces() {
+    TPCANStatus status = 0;
+    TPCANChannelInformation* info = nullptr;
+    auto interfaces = std::make_unique<std::list<std::string>>();
 
+    DWORD channel_count;
+    status = CAN_GetValue(PCAN_NONEBUS, PCAN_ATTACHED_CHANNELS_COUNT, (void*)&channel_count, sizeof(channel_count));
+    if (status != PCAN_ERROR_OK) {
+        logger->error("could not get channel count: {}", get_error(status));
+        goto channel_count_failed;
+    }
+
+    if (channel_count == 0) {
+        return std::make_unique<std::list<std::string>>();
+    }
+
+    info = new TPCANChannelInformation[channel_count];
+
+    status = CAN_GetValue(PCAN_NONEBUS, PCAN_ATTACHED_CHANNELS, (void*)info, channel_count * sizeof(TPCANChannelInformation));
+    if (status != PCAN_ERROR_OK) {
+        logger->error("could not get attached channels: {}", get_error(status));
+        goto attached_channels_failed;
+    }
+
+    for (int i = 0; i < (int) channel_count; i++) {
+        if (!(info[i].channel_condition & PCAN_CHANNEL_AVAILABLE)) {
+            continue;
+        }
+
+        if (!DEVICE_TO_INTERFACE.contains(info[i].channel_handle)) {
+            logger->warn("unknown channel handle {}", info[i].channel_handle);
+            continue;
+        }
+ 
+        interfaces->push_back(DEVICE_TO_INTERFACE.at(info[i].channel_handle));
+    }
+
+    delete[] info;
+    return interfaces;
+
+attached_channels_failed:
+    delete[] info;
+channel_count_failed:
+    return nullptr;
+}
+
+pcan::ptr pcan::create(const std::string& interface) {
 #ifdef BUILD_WINDOWS
     pcan::event_type event = nullptr;
 #endif /* BUILD_WINDOWS */
