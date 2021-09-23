@@ -78,17 +78,24 @@ candle_list_scan_failed:
     return {};
 }
 
-candlelight::ptr candlelight::create(uint8_t device) {
+candlelight::ptr candlelight::create(const std::string& device) {
+    uint8_t device_id              = 0;
     candle_list_handle handle_list = nullptr;
     candle_handle handle           = nullptr;
     candle_devstate_t state        = CANDLE_DEVSTATE_INUSE;
+
+    if (device.rfind("DEV", 0) == std::string::npos) {
+        logger->error("invalid candlelight device '{}'", device);
+        goto invalid_device;
+    }
 
     if (!candle_list_scan(&handle_list)) {
         logger->error("could not list candle devices: UNKNOWN_ERROR");
         goto candle_list_scan_failed;
     }
 
-    if (!candle_dev_get(handle_list, device, &handle)) {
+    device_id = std::stoi(device.substr(3));
+    if (!candle_dev_get(handle_list, device_id, &handle)) {
         logger->error("could not get candle device '{}': {}", device, get_error(handle));
         goto candle_dev_get_failed;
     }
@@ -119,6 +126,7 @@ candle_dev_get_state_failed:
 candle_dev_get_failed:
     candle_list_free(handle_list);
 candle_list_scan_failed:
+invalid_device:
     return nullptr;
 }
 

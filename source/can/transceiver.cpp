@@ -60,7 +60,7 @@ std::map<std::string, std::list<std::string>> transceiver::list_interfaces() {
 transceiver::ptr transceiver::create(const std::string& driver, const std::string& interface) {
 #ifdef ENABLE_DRIVER_CANDLELIGHT
     if (driver == "candlelight") {
-        return driver::candlelight::create(std::stoi(interface));
+        return driver::candlelight::create(interface);
     }
 #endif /* ENABLE_DRIVER_CANDLELIGHT */
 
