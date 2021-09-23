@@ -1,6 +1,7 @@
 #ifndef INCLUDE_CAN_DRIVER_CANDLELIGHT_HPP
 #define INCLUDE_CAN_DRIVER_CANDLELIGHT_HPP
 
+#include <list>
 #include <memory>
 
 #include "can/transceiver.hpp"
@@ -13,7 +14,7 @@ namespace can::driver {
 
 class candlelight : public transceiver {
    public:
-    static interface_list_ptr list_interfaces();
+    static std::list<std::string> list_interfaces();
     static ptr create(uint8_t device);
     ~candlelight() override;
 

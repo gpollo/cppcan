@@ -1,7 +1,6 @@
 #ifndef INCLUDE_CAN_TRANSCEIVER_HPP
 #define INCLUDE_CAN_TRANSCEIVER_HPP
 
-#include <list>
 #include <memory>
 #include <string>
 
@@ -9,8 +8,6 @@
 #include "can/utils/unique_owner_ptr.hpp"
 
 namespace can {
-
-using interface_list_ptr = std::unique_ptr<std::list<std::string>>;
 
 class transmitter {
    public:

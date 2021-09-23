@@ -45,10 +45,10 @@ static std::string get_error(TPCANStatus status) {
     return std::string(pcan_error_buffer.data());
 }
 
-interface_list_ptr pcan::list_interfaces() {
+std::list<std::string> pcan::list_interfaces() {
     TPCANStatus status            = 0;
     TPCANChannelInformation* info = nullptr;
-    auto interfaces               = std::make_unique<std::list<std::string>>();
+    std::list<std::string> interfaces;
 
     DWORD channel_count;
     status = CAN_GetValue(PCAN_NONEBUS, PCAN_ATTACHED_CHANNELS_COUNT, (void*)&channel_count, sizeof(channel_count));
@@ -58,7 +58,7 @@ interface_list_ptr pcan::list_interfaces() {
     }
 
     if (channel_count == 0) {
-        return std::make_unique<std::list<std::string>>();
+        return {};
     }
 
     info = new TPCANChannelInformation[channel_count];
@@ -80,7 +80,7 @@ interface_list_ptr pcan::list_interfaces() {
             continue;
         }
 
-        interfaces->push_back(DEVICE_TO_INTERFACE.at(info[i].channel_handle));
+        interfaces.push_back(DEVICE_TO_INTERFACE.at(info[i].channel_handle));
     }
 
     delete[] info;
@@ -89,7 +89,7 @@ interface_list_ptr pcan::list_interfaces() {
 attached_channels_failed:
     delete[] info;
 channel_count_failed:
-    return nullptr;
+    return {};
 }
 
 pcan::ptr pcan::create(const std::string& interface) {

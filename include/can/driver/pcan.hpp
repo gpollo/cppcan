@@ -1,6 +1,7 @@
 #ifndef INCLUDE_CAN_DRIVER_PCAN_HPP
 #define INCLUDE_CAN_DRIVER_PCAN_HPP
 
+#include <list>
 #include <memory>
 
 #include "can/transceiver.hpp"
@@ -21,7 +22,7 @@ class pcan : public transceiver {
     using event_type = void*;
 #endif /* BUILD_WINDOWS */
 
-    static interface_list_ptr list_interfaces();
+    static std::list<std::string> list_interfaces();
     static ptr create(const std::string& interface);
     ~pcan() override;
 

@@ -1,6 +1,7 @@
 #ifndef INCLUDE_CAN_DRIVER_SOCKETCAN_HPP
 #define INCLUDE_CAN_DRIVER_SOCKETCAN_HPP
 
+#include <list>
 #include <memory>
 #include <mutex>
 
@@ -14,7 +15,7 @@ namespace can::driver {
 
 class socketcan : public transceiver {
    public:
-    static interface_list_ptr list_interfaces();
+    static std::list<std::string> list_interfaces();
     static ptr create(const std::string& interface);
     ~socketcan() override;
 

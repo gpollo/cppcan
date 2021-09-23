@@ -22,17 +22,17 @@ namespace can::driver {
 
 static constexpr uint64_t SEC_TO_USEC = 1e6;
 
-interface_list_ptr socketcan::list_interfaces() {
+std::list<std::string> socketcan::list_interfaces() {
     const std::regex interface_regex(".*\\/(v?can\\d+)");
     const std::string sysfs_dir("/sys/class/net");
 
-    auto interfaces = std::make_unique<std::list<std::string>>();
+    std::list<std::string> interfaces;
     for (const auto& it : std::filesystem::directory_iterator(sysfs_dir)) {
         std::string path = it.path().string();
 
         std::smatch matches;
         if (std::regex_search(path, matches, interface_regex)) {
-            interfaces->push_back(matches[1].str());
+            interfaces.push_back(matches[1].str());
         }
     }
 

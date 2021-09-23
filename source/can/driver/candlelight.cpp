@@ -49,8 +49,8 @@ static std::string get_error(candle_handle handle) {
     return ERROR_TO_STRING.at(candle_dev_last_error(handle));
 }
 
-interface_list_ptr candlelight::list_interfaces() {
-    auto interfaces = std::make_unique<std::list<std::string>>();
+std::list<std::string> candlelight::list_interfaces() {
+    std::list<std::string> interfaces;
 
     candle_list_handle list = nullptr;
     if (!candle_list_scan(&list)) {
@@ -65,7 +65,7 @@ interface_list_ptr candlelight::list_interfaces() {
     }
 
     for (uint8_t i = 0; i < device_count; i++) {
-        interfaces->push_back("DEV" + std::to_string(i));
+        interfaces.push_back("DEV" + std::to_string(i));
     }
 
     candle_list_free(list);
@@ -75,7 +75,7 @@ interface_list_ptr candlelight::list_interfaces() {
 candle_list_length_failed:
     candle_list_free(list);
 candle_list_scan_failed:
-    return nullptr;
+    return {};
 }
 
 candlelight::ptr candlelight::create(uint8_t device) {
