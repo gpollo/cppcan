@@ -39,6 +39,24 @@ bool transceiver::ptr::operator!=(std::nullptr_t other) const {
 
 /* transceiver class */
 
+std::map<std::string, std::list<std::string>> transceiver::list_interfaces() {
+    std::map<std::string, std::list<std::string>> interfaces;
+
+#ifdef ENABLE_DRIVER_CANDLELIGHT
+    interfaces["candlelight"] = driver::candlelight::list_interfaces();
+#endif /* ENABLE_DRIVER_CANDLELIGHT */
+
+#ifdef ENABLE_DRIVER_PCAN
+    interfaces["pcan"] = driver::pcan::list_interfaces();
+#endif /* ENABLE_DRIVER_PCAN */
+
+#ifdef ENABLE_DRIVER_SOCKETCAN
+    interfaces["socketcan"] = driver::socketcan::list_interfaces();
+#endif /* ENABLE_DRIVER_SOCKETCAN */
+
+    return interfaces;
+}
+
 transceiver::ptr transceiver::create(const std::string& driver, const std::string& interface) {
 #ifdef ENABLE_DRIVER_CANDLELIGHT
     if (driver == "candlelight") {

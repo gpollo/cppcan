@@ -1,6 +1,8 @@
 #ifndef INCLUDE_CAN_TRANSCEIVER_HPP
 #define INCLUDE_CAN_TRANSCEIVER_HPP
 
+#include <list>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -37,6 +39,7 @@ class transceiver : public transmitter, public receiver {
         std::shared_ptr<transceiver> transmitter_;
     };
 
+    static std::map<std::string, std::list<std::string>> list_interfaces();
     static ptr create(const std::string& driver, const std::string& interface);
 
     virtual ~transceiver()                          = default;
