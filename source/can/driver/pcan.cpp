@@ -142,8 +142,8 @@ pcan::ptr pcan::create(const std::string& interface) {
 pcan_receive_event_failed:
 #ifdef BUILD_WINDOWS
     CloseHandle(event);
-#endif /* BUILD_WINDOWS */
 create_event_failed:
+#endif /* BUILD_WINDOWS */
     status = CAN_Uninitialize(device);
     if (status != PCAN_ERROR_OK) {
         logger->error("could not uninitialize interface '{}': {}", interface, get_error(status));
@@ -161,7 +161,9 @@ pcan::~pcan() {
         logger->error("could not uninitialize interface: {}", get_error(status));
     }
 
+#ifdef BUILD_WINDOWS
     CloseHandle(event_);
+#endif /* BUILD_WINDOWS */
 }
 
 bool pcan::set_bitrate(unsigned long bitrate) {
@@ -228,7 +230,9 @@ frame::ptr pcan::receive(long timeout_ms) {
         return frame;
     }
 
+#ifdef BUILD_WINDOWS
     ResetEvent(event_);
+#endif /* BUILD_WINDOWS */
 
 #ifdef BUILD_LINUX
     int count = -1;

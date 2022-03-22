@@ -55,12 +55,12 @@ static void test_interface(const std::string& device) {
 
 int main() {
     auto interfaces = can::driver::socketcan::list_interfaces();
-    if (interfaces->empty()) {
+    if (interfaces.empty()) {
         std::cout << "No interface found" << std::endl;
         return 0;
     }
 
-    for (const auto& interface : *interfaces) {
+    for (const auto& interface : interfaces) {
         std::cout << "Testing interface '" << interface << "'" << std::endl;
         test_interface(interface);
         std::cout << std::endl;

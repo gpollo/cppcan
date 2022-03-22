@@ -1,4 +1,4 @@
-project('libpcanbasic-linux', ['c'], version: '4.4.2')
+project('libpcanbasic-linux', ['c'], version: '4.5.4')
 
 cflags = ['-DNO_RT']
 
@@ -6,7 +6,7 @@ cflags = ['-DNO_RT']
 # libpcanbasic #
 ################
 
-libpcanbasic_root = 'PCAN-Basic_Linux-4.4.2/libpcanbasic/pcanbasic'
+libpcanbasic_root = 'PCAN-Basic_Linux-4.5.4/libpcanbasic/pcanbasic'
 
 libpcanbasic_includes = [
     include_directories(libpcanbasic_root / 'src/pcan/driver'),

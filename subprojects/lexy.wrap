@@ -4,4 +4,4 @@ lead_directory_missing = true
 patch_directory = lexy
 
 url = https://github.com/foonathan/lexy.git
-revision = head
+revision = 9dda81430e5cdfc568b653a7c6dd27ff193740c2
