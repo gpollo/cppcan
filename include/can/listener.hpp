@@ -11,99 +11,88 @@
 #include "can/frame.hpp"
 #include "can/transceiver.hpp"
 #include "can/utils/blocking_queue.hpp"
-#include "can/utils/unique_owner_ptr.hpp"
 
 namespace can {
 
 class listener : public std::enable_shared_from_this<listener> {
    public:
-    using ptr              = std::shared_ptr<listener>;
-    using raw_callback     = std::function<void(const frame::ptr&)>;
-    using message_callback = std::function<void(database::message::const_ptr,
-                                                const std::vector<std::pair<database::signal::const_ptr, float>>&)>;
-    using signal_callback  = std::function<void(database::signal::const_ptr, float)>;
+    using ptr      = std::shared_ptr<listener>;
+    using callback = std::function<void(const frame::ptr&)>;
 
-    listener(database::const_ptr database);
+    listener();
     ~listener();
 
+    /**
+     * This method attaches a new transceiver to the listener.
+     */
+    quark start(utils::unique_owner_ptr<transceiver> transceiver);
+
+    /**
+     * This method shutdowns a single transceiver.
+     */
+    void shutdown(quark transceiver);
+
+    /**
+     * This method shutdowns the listener and all of its transceivers. It is called in the destructor.
+     */
+    void shutdown();
+
+    /**
+     * This class is a wrapper around a subscriber. If will automatically unsubscribe the subscriber if it is freed.
+     */
     class subscriber_guard {
        public:
-        using ptr = utils::unique_owner_ptr<subscriber_guard>;
+        using ptr = std::unique_ptr<subscriber_guard>;
 
-        subscriber_guard(listener::ptr listener);
-        virtual ~subscriber_guard() = default;
+        subscriber_guard(listener::ptr listener, quark quark);
+        ~subscriber_guard();
 
-        virtual void unsubscribe() = 0;
+        /**
+         * This method removes the subscriber from the listener. It may only be called once. It is called in the
+         * destructor.
+         */
+        void unsubscribe();
 
-       protected:
-        bool subscribed_ = true;
+       private:
         listener::ptr listener_;
+        const quark quark_;
+        bool subscribed_;
     };
 
-    subscriber_guard::ptr subscribe(raw_callback callback);
-    subscriber_guard::ptr subscribe(unsigned int identifier, message_callback callback);
-    subscriber_guard::ptr subscribe(unsigned int identifier, const std::string& signal_name, signal_callback callback);
-    void shutdown();
-    void shutdown(quark transceiver);
-    quark add_transceiver(utils::unique_owner_ptr<transceiver> transceiver);
+    /**
+     * This method creates a new subscriber for either all frame or a specific frame ID.
+     */
+    subscriber_guard::ptr subscribe(callback callback, std::optional<unsigned int> identifier = {});
 
    private:
-    struct raw_subscriber {
-        const raw_callback callback_;
+    /**
+     * This class represents a subscriber to raw frames.
+     */
+    struct subscriber {
+        const callback callback_;
+        const std::optional<unsigned int> identifier_;
 
-        raw_subscriber(raw_callback callback);
+        subscriber(callback callback, std::optional<unsigned int> identifier);
     };
 
-    struct message_subscriber {
-        const unsigned int identifier_;
-        const message_callback callback_;
+    /**
+     * Mutex used to protect subscriber list.
+     */
+    std::shared_mutex subscriber_mutex_;
 
-        message_subscriber(unsigned int identifier, message_callback callback);
-    };
+    /**
+     * The current list of subscribers.
+     */
+    std::unordered_map<quark, subscriber> subscribers_;
 
-    struct signal_subscriber {
-        const unsigned int identifier_;
-        const std::string signal_name_;
-        const signal_callback callback_;
-        std::optional<quark> signal_quark_;
+    /**
+     * This method removes a subscriber from the listener.
+     */
+    void unsubscribe(quark quark);
 
-        signal_subscriber(unsigned int identifier, std::string signal_name, signal_callback callback);
-    };
-
-    class raw_subscriber_guard : public subscriber_guard {
-       public:
-        raw_subscriber_guard(listener::ptr listener, quark quark);
-        ~raw_subscriber_guard() override;
-        void unsubscribe() override;
-
-       private:
-        const quark quark_;
-    };
-
-    class message_subscriber_guard : public subscriber_guard {
-       public:
-        message_subscriber_guard(listener::ptr listener, unsigned int identifier, quark quark);
-        ~message_subscriber_guard() override;
-        void unsubscribe() override;
-
-       private:
-        const unsigned int identifier_;
-        const quark quark_;
-    };
-
-    class signal_subscriber_guard : public subscriber_guard {
-       public:
-        signal_subscriber_guard(listener::ptr listener, unsigned int identifier, const std::string& signal_name,
-                                quark quark);
-        ~signal_subscriber_guard() override;
-        void unsubscribe() override;
-
-       private:
-        const unsigned int identifier_;
-        const std::string signal_name_;
-        const quark quark_;
-    };
-
+    /**
+     * This class represents a thread in the listener (procuder or consumer).
+     */
     struct listener_thread {
         std::atomic_bool running_;
         std::thread thread_;
@@ -116,28 +105,40 @@ class listener : public std::enable_shared_from_this<listener> {
         listener_thread(Method method, Class obj) : running_(true), thread_(method, obj, this) {}
     };
 
+    /**
+     * Mutex used to protect transceiver/threads list.
+     */
     std::mutex transceiver_mutex_;
-    std::shared_mutex subscriber_mutex_;
 
+    /**
+     * The current list of producer (transceiver) threads.
+     */
     std::unordered_map<quark, listener_thread> producer_threads_;
+
+    /**
+     * The single consumer thread.
+     */
     listener_thread consumer_thread_;
 
-    std::unordered_map<quark, raw_subscriber> raw_subscribers_;
-    std::unordered_map<unsigned int, std::unordered_map<quark, message_subscriber>> message_subscribers_;
-    std::unordered_map<unsigned int, std::unordered_map<quark, signal_subscriber>> signal_subscribers_;
-
-    database::const_ptr database_;
+    /**
+     * The queue of frames that the consumer needs to consume.
+     */
     utils::blocking_queue<frame::ptr> frames_;
 
+    /**
+     * The thread function of a producer thread.
+     */
     void producer_thread_function(listener_thread* thread, utils::unique_owner_ptr<transceiver> transceiver);
-    void consumer_thread_function(listener_thread* thread);
-    void handle_raw_subscribers(const frame::ptr& frame);
-    void handle_message_subscribers(const frame::ptr& frame);
-    void handle_signal_subscribers(const frame::ptr& frame);
 
-    void unsubscribe(quark quark);
-    void unsubscribe(unsigned int identifier, quark quark);
-    void unsubscribe(unsigned int identifier, const std::string& signal_name, quark quark);
+    /**
+     * The thread function of the consumer thread.
+     */
+    void consumer_thread_function(listener_thread* thread);
+
+    /**
+     * This method dispatches a single frame to all relevant subscribers.
+     */
+    void dispatch_frame(const frame::ptr& frame);
 };
 
 } /* namespace can */
