@@ -1,7 +1,7 @@
 # requires Flexible Array Member (FAM) compiler extension
 
 project('can', ['cpp'],
-    default_options: ['cpp_std=c++20'],
+    default_options: ['cpp_std=c++2a'],
     version: 'latest',
 )
 

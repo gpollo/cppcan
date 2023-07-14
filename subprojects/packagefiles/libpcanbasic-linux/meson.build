@@ -6,9 +6,10 @@ cflags = ['-DNO_RT']
 # libpcanbasic #
 ################
 
-libpcanbasic_root = 'PCAN-Basic_Linux-4.5.4/libpcanbasic/pcanbasic'
+libpcanbasic_root = 'PCAN-Basic_Linux-4.7.0.3/libpcanbasic/pcanbasic'
 
 libpcanbasic_includes = [
+    include_directories(libpcanbasic_root / 'include'),
     include_directories(libpcanbasic_root / 'src/pcan/driver'),
     include_directories(libpcanbasic_root / 'src/pcan/lib')
 ]
@@ -30,5 +31,5 @@ libpcanbasic = static_library('pcanbasic', libpcanbasic_sources,
 
 libpcanbasic_dep = declare_dependency(
     link_with: libpcanbasic,
-    include_directories: include_directories(libpcanbasic_root),
+    include_directories: libpcanbasic_includes,
 )

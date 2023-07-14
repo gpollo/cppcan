@@ -1,8 +1,8 @@
 [wrap-file]
-directory = libpcanbasic-linux-4.5.4
+directory = libpcanbasic-linux
 lead_directory_missing = true
 patch_directory = libpcanbasic-linux
 
-source_url = https://www.peak-system.com/produktcd/Develop/PC%20interfaces/Linux/PCAN-Basic_API_for_Linux/PCAN-Basic_Linux-4.5.4.tar.gz
-source_filename = PCAN-Basic_Linux-4.4.2.tar.gz
-source_hash = 6b4fd0fb2a64f234f8407ec985c77d24f4c50578a55383916da491158215422e
+source_url = https://www.peak-system.com/produktcd/Develop/PC%20interfaces/Linux/PCAN-Basic_API_for_Linux/PCAN-Basic_Linux-4.7.0.3.tar.gz
+source_filename = PCAN-Basic_Linux-4.7.0.3.tar.gz
+source_hash = 858881a6d514ebe7b5c38c8a6210d2fd0e7a988e2722b081702870ce11ad5569

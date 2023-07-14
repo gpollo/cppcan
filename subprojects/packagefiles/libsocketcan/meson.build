@@ -28,13 +28,8 @@ libsocketcan_sources = [
     'src/libsocketcan.c',
 ]
 
-libsocketcan_deps = [
-    cc.find_library('netlink', required: true, static: true),
-]
-
 libsocketcan = static_library('socketcan', libsocketcan_sources,
     include_directories: libsocketcan_includes,
-    dependencies: libsocketcan_deps,
 )
 
 libsocketcan_dep = declare_dependency(

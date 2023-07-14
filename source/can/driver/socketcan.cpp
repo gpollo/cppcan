@@ -108,8 +108,8 @@ bool socketcan::transmit(frame::ptr msg) {
     }
 
     can_frame frame{};
-    frame.can_id = msg->identifier_;
-    frame.len    = msg->length_;
+    frame.can_id  = msg->identifier_;
+    frame.can_dlc = msg->length_;
     /* NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic): library function */
     std::copy(msg->bytes_, msg->bytes_ + msg->length_, frame.data);
 
@@ -172,7 +172,7 @@ frame::ptr socketcan::receive(long timeout_ms) {
     }
     uint64_t timestamp = tv.tv_sec * SEC_TO_USEC + tv.tv_usec;
 
-    return frame::create(frame.can_id & CAN_SFF_MASK, frame.len, frame.data, timestamp);
+    return frame::create(frame.can_id & CAN_SFF_MASK, frame.can_dlc, frame.data, timestamp);
 }
 
 } /* namespace can::driver */
