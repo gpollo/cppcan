@@ -99,7 +99,9 @@ libcan_dep = declare_dependency(
     link_whole: libcan_static,
 )
 
-subdir('tests')
+if not meson.is_subproject()
+    subdir('tests')
+endif
 
 ###########
 # candump #
